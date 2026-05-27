@@ -16,6 +16,13 @@ type OtpRecord = {
 const otpFilePath = path.join(process.cwd(), "data", "whatsapp-otps.json");
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const isProduction = process.env.NODE_ENV === "production";
+
+function assertProductionOtpStorageConfigured() {
+  if (isProduction && (!supabaseUrl || !supabaseServiceRoleKey)) {
+    throw new Error("Supabase OTP storage is not configured. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.");
+  }
+}
 
 function createCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -48,6 +55,10 @@ function fromSupabaseRow(row: Record<string, unknown>): OtpRecord {
 }
 
 async function readOtpRecords() {
+  if (isProduction && (!supabaseUrl || !supabaseServiceRoleKey)) {
+    return [];
+  }
+
   try {
     const file = await readFile(otpFilePath, "utf8");
     return JSON.parse(file) as OtpRecord[];
@@ -97,6 +108,7 @@ export async function sendWhatsappOtp(whatsapp: string) {
       throw new Error((await response.text()) || "Could not create OTP.");
     }
   } else {
+    assertProductionOtpStorageConfigured();
     const records = await readOtpRecords();
     await writeOtpRecords([record, ...records].slice(0, 100));
   }
@@ -163,6 +175,8 @@ export async function verifyWhatsappOtp({ whatsapp, code }: { whatsapp: string; 
     return verificationToken;
   }
 
+  assertProductionOtpStorageConfigured();
+
   const records = await readOtpRecords();
   const record = records.find(
     (entry) => entry.whatsappNormalized === whatsappNormalized && entry.code === code.trim() && new Date(entry.expiresAt) >= now
@@ -215,6 +229,8 @@ export async function isWhatsappVerificationValid({
     const rows = (await response.json()) as Record<string, unknown>[];
     return rows.length > 0;
   }
+
+  assertProductionOtpStorageConfigured();
 
   const records = await readOtpRecords();
   return records.some(

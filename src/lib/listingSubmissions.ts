@@ -25,6 +25,13 @@ export type ListingSubmission = ListingSubmissionInput & {
 const submissionsFilePath = path.join(process.cwd(), "data", "listing-submissions.json");
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const isProduction = process.env.NODE_ENV === "production";
+
+function assertProductionStorageConfigured() {
+  if (isProduction && (!supabaseUrl || !supabaseServiceRoleKey)) {
+    throw new Error("Supabase is not configured. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.");
+  }
+}
 
 export function normalizeWhatsapp(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -126,6 +133,10 @@ async function createSupabaseSubmission(submission: ListingSubmission) {
 }
 
 async function readSubmissions() {
+  if (isProduction && (!supabaseUrl || !supabaseServiceRoleKey)) {
+    return [];
+  }
+
   try {
     const file = await readFile(submissionsFilePath, "utf8");
     return JSON.parse(file) as ListingSubmission[];
@@ -150,6 +161,10 @@ export async function createListingSubmission(input: ListingSubmissionInput) {
 
   if (savedToSupabase) {
     return submission;
+  }
+
+  if (isProduction) {
+    assertProductionStorageConfigured();
   }
 
   const submissions = await readSubmissions();
@@ -278,6 +293,8 @@ export async function updateListingSubmissionByOwner({
     return rows[0] ? fromSupabaseRow(rows[0]) : undefined;
   }
 
+  assertProductionStorageConfigured();
+
   const submissions = await readSubmissions();
   const index = submissions.findIndex((submission) => submission.id === id && submission.ownerToken === ownerToken);
 
@@ -353,6 +370,8 @@ export async function updateListingSubmissionByWhatsapp({
     return rows[0] ? fromSupabaseRow(rows[0]) : undefined;
   }
 
+  assertProductionStorageConfigured();
+
   const submissions = await readSubmissions();
   const index = submissions.findIndex(
     (submission) => submission.id === id && normalizeWhatsapp(submission.whatsapp) === whatsappNormalized
@@ -398,6 +417,8 @@ export async function deleteListingSubmissionByOwner({ id, ownerToken }: { id: s
     return response.ok;
   }
 
+  assertProductionStorageConfigured();
+
   const submissions = await readSubmissions();
   const nextSubmissions = submissions.filter(
     (submission) => !(submission.id === id && submission.ownerToken === ownerToken)
@@ -436,6 +457,8 @@ export async function deleteListingSubmissionByWhatsapp({ id, whatsapp }: { id: 
 
     return response.ok;
   }
+
+  assertProductionStorageConfigured();
 
   const submissions = await readSubmissions();
   const nextSubmissions = submissions.filter(
