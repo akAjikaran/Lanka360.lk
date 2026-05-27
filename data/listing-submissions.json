@@ -1,0 +1,15 @@
+[
+  {
+    "kind": "store",
+    "name": "Aji cafe",
+    "type": "Cafe",
+    "whatsapp": "0779060372",
+    "phone": "0779060372",
+    "description": "This is ajis store",
+    "address": "Talimannar",
+    "district": "Mannar",
+    "id": "0c8a0fee-5aa9-4d99-9f1d-4474cc1a6394",
+    "status": "pending",
+    "createdAt": "2026-05-27T12:55:43.885Z"
+  }
+]
