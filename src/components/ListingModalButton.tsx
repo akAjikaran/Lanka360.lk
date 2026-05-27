@@ -50,17 +50,7 @@ function getKindForType(type: string): ListingKind {
   return "business";
 }
 
-function getOwnerToken() {
-  const existingToken = localStorage.getItem("lanka360_owner_token");
-
-  if (existingToken) {
-    return existingToken;
-  }
-
-  const token = crypto.randomUUID();
-  localStorage.setItem("lanka360_owner_token", token);
-  return token;
-}
+const adminWhatsappNumber = "94787059476";
 
 export function ListingModalButton({
   kind = "business",
@@ -92,48 +82,34 @@ export function ListingModalButton({
     const formData = new FormData(form);
     const selectedFormType = String(formData.get("type") ?? "").trim();
     const whatsapp = String(formData.get("whatsapp") ?? "").trim();
+    const phone = sameAsWhatsapp ? whatsapp : String(formData.get("phone") ?? "").trim();
     const image = formData.get("image");
     const imageName = image instanceof File && image.size > 0 ? image.name : "";
+    const resolvedKind = kind === "business" ? getKindForType(selectedFormType) : kind;
+    const listingRequest = [
+      "New Lanka360 Listing Request",
+      "",
+      `Type: ${resolvedKind}`,
+      `Category: ${selectedFormType}`,
+      `Business Name: ${String(formData.get("name") ?? "").trim()}`,
+      `District: ${String(formData.get("district") ?? "").trim()}`,
+      `Address: ${String(formData.get("address") ?? "").trim()}`,
+      `WhatsApp: ${whatsapp}`,
+      `Phone: ${phone || "-"}`,
+      `Description: ${String(formData.get("description") ?? "").trim() || "-"}`,
+      `Image file name: ${imageName || "-"}`,
+    ].join("\n");
 
     try {
-      const ownerToken = getOwnerToken();
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ownerToken,
-          kind: kind === "business" ? getKindForType(selectedFormType) : kind,
-          name: formData.get("name"),
-          type: selectedFormType,
-          whatsapp,
-          phone: sameAsWhatsapp ? whatsapp : formData.get("phone"),
-          description: formData.get("description"),
-          address: formData.get("address"),
-          district: formData.get("district"),
-          imageName,
-        }),
-      });
-
-      const responseText = await response.text();
-      const result = responseText ? (JSON.parse(responseText) as { error?: string; id?: string }) : {};
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Could not submit listing.");
-      }
-
+      const whatsappUrl = `https://wa.me/${adminWhatsappNumber}?text=${encodeURIComponent(listingRequest)}`;
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       form.reset();
-      if (result.id) {
-        const ownedIds = JSON.parse(localStorage.getItem("lanka360_listing_ids") ?? "[]") as string[];
-        localStorage.setItem("lanka360_listing_ids", JSON.stringify(Array.from(new Set([result.id, ...ownedIds]))));
-      }
       setSameAsWhatsapp(false);
       setSubmitState("success");
-      setMessage("Your listing was submitted and is waiting for approval.");
+      setMessage("WhatsApp opened with your listing request. Send the message there and we will review it manually.");
     } catch (error) {
       setSubmitState("error");
-      setMessage(error instanceof Error ? error.message : "Could not submit listing.");
+      setMessage(error instanceof Error ? error.message : "Could not open WhatsApp.");
     }
   };
 
@@ -278,8 +254,8 @@ export function ListingModalButton({
                 <div className="mt-4 flex gap-3 rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-sm leading-6 text-brand-dark">
                   <AlertTriangle className="mt-0.5 shrink-0" size={20} />
                   <p>
-                    <strong>Do not upload copyright-protected images.</strong> Use only your own original photos or
-                    properly licensed images. Copyrighted images will be rejected.
+                    <strong>Do not send copyright-protected images.</strong> WhatsApp will include the image file name in
+                    the request. You can attach the actual image in the WhatsApp chat after sending the message.
                   </p>
                 </div>
 
@@ -309,7 +285,7 @@ export function ListingModalButton({
                   disabled={submitState === "submitting"}
                   className="rounded-lg bg-emerald-600 px-6 py-3 text-base font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitState === "submitting" ? "Submitting..." : "Submit Application"}
+                  {submitState === "submitting" ? "Opening WhatsApp..." : "Send via WhatsApp"}
                 </button>
               </div>
             </form>
