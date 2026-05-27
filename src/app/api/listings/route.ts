@@ -14,6 +14,11 @@ function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function cleanCoordinate(value: unknown) {
+  const coordinate = typeof value === "number" ? value : Number(clean(value));
+  return Number.isFinite(coordinate) ? coordinate : undefined;
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
@@ -26,6 +31,9 @@ export async function POST(request: Request) {
     const description = clean(body.description);
     const address = clean(body.address);
     const district = clean(body.district);
+    const googleMapsUrl = clean(body.googleMapsUrl);
+    const latitude = cleanCoordinate(body.latitude);
+    const longitude = cleanCoordinate(body.longitude);
     const imageName = clean(body.imageName);
 
     if (!listingKinds.has(kind)) {
@@ -46,6 +54,9 @@ export async function POST(request: Request) {
       description: description || undefined,
       address,
       district,
+      googleMapsUrl: googleMapsUrl || undefined,
+      latitude,
+      longitude,
       imageName: imageName || undefined,
     });
 

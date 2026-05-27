@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, MouseEvent, ReactNode, useState } from "react";
 import {
   AlertTriangle,
   Bold,
@@ -10,6 +10,7 @@ import {
   List,
   ListOrdered,
   LocateFixed,
+  MapPin,
   Store,
   Underline,
   X,
@@ -50,6 +51,92 @@ function getKindForType(type: string): ListingKind {
   return "business";
 }
 
+const defaultMapLocation = { latitude: 7.8731, longitude: 80.7718 };
+const mapZoom = 8;
+const tileSize = 256;
+
+function projectLocation(latitude: number, longitude: number, zoom: number) {
+  const scale = tileSize * 2 ** zoom;
+  const sinLatitude = Math.sin((latitude * Math.PI) / 180);
+
+  return {
+    x: ((longitude + 180) / 360) * scale,
+    y: (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI)) * scale,
+  };
+}
+
+function unprojectLocation(x: number, y: number, zoom: number) {
+  const scale = tileSize * 2 ** zoom;
+  const longitude = (x / scale) * 360 - 180;
+  const latitudeRadians = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / scale)));
+
+  return {
+    latitude: (latitudeRadians * 180) / Math.PI,
+    longitude,
+  };
+}
+
+function MapPicker({
+  value,
+  onChange,
+}: {
+  value: { latitude: number; longitude: number } | null;
+  onChange: (location: { latitude: number; longitude: number }) => void;
+}) {
+  const center = value ?? defaultMapLocation;
+  const centerPixel = projectLocation(center.latitude, center.longitude, mapZoom);
+  const centerTileX = Math.floor(centerPixel.x / tileSize);
+  const centerTileY = Math.floor(centerPixel.y / tileSize);
+  const tileOffsets = [-2, -1, 0, 1, 2];
+
+  const handleMapClick = (event: MouseEvent<HTMLDivElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = centerPixel.x + event.clientX - (bounds.left + bounds.width / 2);
+    const y = centerPixel.y + event.clientY - (bounds.top + bounds.height / 2);
+
+    onChange(unprojectLocation(x, y, mapZoom));
+  };
+
+  return (
+    <div
+      className="relative mt-4 h-72 cursor-crosshair overflow-hidden rounded-lg border border-stone-200 bg-stone-200"
+      onClick={handleMapClick}
+      role="button"
+      tabIndex={0}
+      aria-label="Select listing location on map"
+    >
+      {tileOffsets.flatMap((offsetX) =>
+        tileOffsets.map((offsetY) => {
+          const tileX = centerTileX + offsetX;
+          const tileY = centerTileY + offsetY;
+
+          return (
+            <img
+              key={`${tileX}-${tileY}`}
+              src={`https://tile.openstreetmap.org/${mapZoom}/${tileX}/${tileY}.png`}
+              alt=""
+              className="absolute size-64 select-none"
+              draggable={false}
+              style={{
+                left: `calc(50% + ${tileX * tileSize - centerPixel.x}px)`,
+                top: `calc(50% + ${tileY * tileSize - centerPixel.y}px)`,
+              }}
+            />
+          );
+        })
+      )}
+      {value ? (
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
+          <MapPin size={38} className="fill-red-600 text-red-700 drop-shadow-lg" />
+        </div>
+      ) : null}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-white/90 px-3 py-2 text-xs font-semibold text-stone-600">
+        Tap the map to select the store or service location. Map data © OpenStreetMap contributors.
+      </div>
+    </div>
+  );
+}
+
 export function ListingModalButton({
   kind = "business",
   defaultType = "Cafe",
@@ -65,6 +152,9 @@ export function ListingModalButton({
   const [sameAsWhatsapp, setSameAsWhatsapp] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [successAlert, setSuccessAlert] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationMessage, setLocationMessage] = useState("");
 
   const noun = kind === "service" ? "Service" : kind === "store" ? "Store" : "Business";
   const lowerNoun = noun.toLowerCase();
@@ -81,8 +171,6 @@ export function ListingModalButton({
     const selectedFormType = String(formData.get("type") ?? "").trim();
     const whatsapp = String(formData.get("whatsapp") ?? "").trim();
     const phone = sameAsWhatsapp ? whatsapp : String(formData.get("phone") ?? "").trim();
-    const image = formData.get("image");
-    const imageName = image instanceof File && image.size > 0 ? image.name : "";
     const resolvedKind = kind === "business" ? getKindForType(selectedFormType) : kind;
 
     try {
@@ -100,7 +188,9 @@ export function ListingModalButton({
           description: formData.get("description"),
           address: formData.get("address"),
           district: formData.get("district"),
-          imageName,
+          googleMapsUrl: formData.get("googleMapsUrl"),
+          latitude: selectedLocation?.latitude,
+          longitude: selectedLocation?.longitude,
         }),
       });
 
@@ -113,8 +203,12 @@ export function ListingModalButton({
 
       form.reset();
       setSameAsWhatsapp(false);
-      setSubmitState("success");
-      setMessage("We received your request. We will review it and make it visible after approval.");
+      setSelectedLocation(null);
+      setLocationMessage("");
+      setSubmitState("idle");
+      setMessage("");
+      setOpen(false);
+      setSuccessAlert(true);
     } catch (error) {
       setSubmitState("error");
       setMessage(error instanceof Error ? error.message : "Could not submit listing.");
@@ -124,6 +218,7 @@ export function ListingModalButton({
   const openModal = () => {
     setSubmitState("idle");
     setMessage("");
+    setLocationMessage("");
     setOpen(true);
   };
 
@@ -131,6 +226,29 @@ export function ListingModalButton({
     setOpen(false);
     setSubmitState("idle");
     setMessage("");
+    setLocationMessage("");
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMessage("Location is not supported by this browser.");
+      return;
+    }
+
+    setLocationMessage("Detecting your current location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setSelectedLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationMessage("Location selected from your current position.");
+      },
+      () => {
+        setLocationMessage("Could not detect location. Select it on the map instead.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (
@@ -139,14 +257,35 @@ export function ListingModalButton({
         {children}
       </button>
 
+      {successAlert ? (
+        <div className="fixed inset-x-4 top-24 z-[110] mx-auto max-w-md rounded-lg border border-emerald-200 bg-white p-4 text-sm font800 text-emerald-800 shadow-2xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-base font-black text-emerald-900">Successfully created</h3>
+              <p className="mt-1 text-sm font-semibold text-emerald-800">
+                We received your request and will review it before making it visible.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessAlert(false)}
+              className="grid size-8 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-900 transition hover:bg-emerald-100"
+              aria-label="Close success message"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {open ? (
         <div className="fixed inset-0 z-[100] bg-stone-950/60 p-0 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true">
-          <div className="flex min-h-full items-start justify-center sm:items-center">
+          <div className="flex min-h-[100dvh] items-start justify-center sm:items-center">
             <form
               onSubmit={handleSubmit}
-              className="min-h-screen w-full overflow-hidden bg-white shadow-2xl sm:min-h-0 sm:max-h-[92vh] sm:max-w-5xl sm:rounded-lg"
+              className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl sm:h-auto sm:max-h-[92vh] sm:max-w-5xl sm:rounded-lg"
             >
-              <div className="flex items-center justify-between bg-brand px-4 py-4 text-stone-950 sm:px-7">
+              <div className="shrink-0 flex items-center justify-between bg-brand px-4 py-4 text-stone-950 sm:px-7">
                 <h2 className="flex items-center gap-3 text-xl font-black tracking-tight sm:text-3xl">
                   <Store size={28} />
                   List Your {noun} on Lanka360
@@ -161,7 +300,7 @@ export function ListingModalButton({
                 </button>
               </div>
 
-              <div className="max-h-[calc(100vh-168px)] overflow-y-auto px-4 py-6 sm:max-h-[calc(92vh-168px)] sm:px-7 sm:py-8">
+              <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-7 sm:py-8">
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label={`${noun} Name *`}>
                     <input name="name" className="form-input" required />
@@ -240,30 +379,47 @@ export function ListingModalButton({
                   </Field>
                 </div>
 
-                <div className="my-5 text-center text-sm font800 text-stone-500">- or -</div>
-
-                <button
-                  type="button"
-                  className="mx-auto flex w-full max-w-xs items-center justify-center gap-2 rounded-lg bg-stone-950 px-5 py-3 text-base font-black text-brand shadow-sm sm:text-lg"
-                >
-                  <LocateFixed size={20} />
-                  Detect My Location
-                </button>
-
-                <Field label="Upload Image" className="mt-7">
+                <Field label="Google Maps Link (Optional)" className="mt-6">
                   <input
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    className="block w-full rounded-lg border border-stone-200 text-sm text-stone-600 file:mr-4 file:border-0 file:bg-stone-100 file:px-5 file:py-4 file:font800 file:text-stone-700"
+                    name="googleMapsUrl"
+                    type="url"
+                    className="form-input"
+                    placeholder="Paste your Google Maps share link"
                   />
                 </Field>
 
-                <div className="mt-4 flex gap-3 rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-sm leading-6 text-brand-dark">
+                <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-[0.14em] text-stone-500">Map Location</h3>
+                      <p className="mt-1 text-sm font-semibold text-stone-600">
+                        Use your current location or tap the map to place the pin.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={useCurrentLocation}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-stone-950 px-4 py-3 text-sm font-black text-brand shadow-sm"
+                    >
+                      <LocateFixed size={18} />
+                      Use Current Location
+                    </button>
+                  </div>
+                  <MapPicker value={selectedLocation} onChange={setSelectedLocation} />
+                  <input type="hidden" name="latitude" value={selectedLocation?.latitude ?? ""} />
+                  <input type="hidden" name="longitude" value={selectedLocation?.longitude ?? ""} />
+                  <p className="mt-3 min-h-5 text-sm font800 text-brand-dark">
+                    {locationMessage ||
+                      (selectedLocation
+                        ? `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`
+                        : "No map location selected yet.")}
+                  </p>
+                </div>
+
+                <div className="mt-7 flex gap-3 rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-sm leading-6 text-brand-dark">
                   <AlertTriangle className="mt-0.5 shrink-0" size={20} />
                   <p>
-                    <strong>Do not upload copyright-protected images.</strong> Use only your own original photos or
-                    properly licensed images. Copyrighted images will be rejected.
+                    <strong>Listing review:</strong> We will check submitted details before publishing the listing.
                   </p>
                 </div>
 
@@ -280,7 +436,7 @@ export function ListingModalButton({
                 ) : null}
               </div>
 
-              <div className="flex flex-col-reverse gap-3 border-t border-stone-200 bg-white px-4 py-4 sm:flex-row sm:justify-end sm:px-7">
+              <div className="shrink-0 flex flex-col-reverse gap-3 border-t border-stone-200 bg-white px-4 py-4 shadow-[0_-10px_28px_rgba(15,23,42,0.08)] sm:flex-row sm:justify-end sm:px-7 sm:shadow-none">
                 <button
                   type="button"
                   onClick={closeModal}

@@ -10,6 +10,9 @@ create table if not exists public.listing_submissions (
   description text,
   address text not null,
   district text not null,
+  google_maps_url text,
+  latitude double precision,
+  longitude double precision,
   image_name text,
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
   created_at timestamptz not null default now()
@@ -23,6 +26,15 @@ alter table public.listing_submissions
 
 alter table public.listing_submissions
   add column if not exists whatsapp_normalized text;
+
+alter table public.listing_submissions
+  add column if not exists google_maps_url text;
+
+alter table public.listing_submissions
+  add column if not exists latitude double precision;
+
+alter table public.listing_submissions
+  add column if not exists longitude double precision;
 
 create index if not exists listing_submissions_owner_token_idx
   on public.listing_submissions (owner_token, created_at desc);

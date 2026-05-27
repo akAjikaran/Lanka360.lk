@@ -36,6 +36,35 @@ function normalizeWhatsapp(value: string) {
   return digits;
 }
 
+function getGoogleMapsUrl(address: string, googleMapsUrl?: string, latitude?: number, longitude?: number) {
+  if (typeof latitude === "number" && typeof longitude === "number") {
+    return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  }
+
+  return googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+function getGoogleMapsEmbedUrl({
+  address,
+  googleMapsUrl,
+  latitude,
+  longitude,
+}: {
+  address: string;
+  googleMapsUrl?: string;
+  latitude?: number;
+  longitude?: number;
+}) {
+  if (typeof latitude === "number" && typeof longitude === "number") {
+    return `https://www.google.com/maps?q=${latitude},${longitude}&output=embed`;
+  }
+
+  const coordinates = googleMapsUrl?.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  const query = coordinates ? `${coordinates[1]},${coordinates[2]}` : address;
+
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+}
+
 export async function ServiceProfilePage({ categorySlug, serviceSlug }: { categorySlug: string; serviceSlug: string }) {
   const category = getDirectoryItem("services", categorySlug);
   const staticService = getServiceListing(categorySlug, serviceSlug);
@@ -63,6 +92,9 @@ export async function ServiceProfilePage({ categorySlug, serviceSlug }: { catego
       }
     : undefined);
   const isSubmittedService = Boolean(approvedService && !staticService);
+  const serviceGoogleMapsUrl = approvedService?.googleMapsUrl;
+  const serviceLatitude = approvedService?.latitude;
+  const serviceLongitude = approvedService?.longitude;
 
   if (!category || !service) {
     notFound();
@@ -143,7 +175,7 @@ export async function ServiceProfilePage({ categorySlug, serviceSlug }: { catego
                   Call Now
                 </a>
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(service.address)}`}
+                  href={getGoogleMapsUrl(service.address, serviceGoogleMapsUrl, serviceLatitude, serviceLongitude)}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-3 text-sm font-black text-stone-950 shadow-sm"
                 >
                   <Navigation size={17} />
@@ -215,20 +247,22 @@ export async function ServiceProfilePage({ categorySlug, serviceSlug }: { catego
                   Location
                 </h2>
                 <div className="relative min-h-[360px] overflow-hidden rounded-lg border border-stone-200 bg-brand/10 sm:min-h-[520px]">
-                  <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(#d6d3d1_1px,transparent_1px),linear-gradient(90deg,#d6d3d1_1px,transparent_1px)] [background-size:36px_36px]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_45%_45%,rgba(29,203,121,0.42),transparent_18%),radial-gradient(circle_at_70%_62%,rgba(59,130,246,0.18),transparent_14%)]" />
+                  <iframe
+                    src={getGoogleMapsEmbedUrl({
+                      address: service.address,
+                      googleMapsUrl: serviceGoogleMapsUrl,
+                      latitude: serviceLatitude,
+                      longitude: serviceLongitude,
+                    })}
+                    title={`${service.name} location`}
+                    className="absolute inset-0 size-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                   <div className="absolute left-4 top-4 max-w-xs rounded-lg bg-white p-4 shadow-sm">
                     <p className="font-black text-stone-950">{service.name}</p>
                     <p className="mt-1 text-xs leading-5 text-stone-600">{service.address}</p>
                     <p className="mt-2 text-sm font-black text-brand-dark">{isSubmittedService ? "" : `${service.rating} rating`}</p>
-                  </div>
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <span className="mx-auto grid size-14 place-items-center rounded-full bg-red-600 text-white shadow-xl">
-                      <MapPin size={30} fill="currentColor" />
-                    </span>
-                    <p className="mt-3 rounded-full bg-white px-4 py-2 text-sm font-black text-stone-950 shadow-sm">
-                      {service.name}
-                    </p>
                   </div>
                 </div>
               </section>

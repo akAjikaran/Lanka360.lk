@@ -7,23 +7,12 @@ import { ListingModalButton } from "@/components/ListingModalButton";
 import { MobileExploreDrawer } from "@/components/MobileExploreDrawer";
 import { sriLankanDistricts } from "@/lib/locationData";
 import {
-  BriefcaseBusiness,
-  Building2,
   MapPin,
   Menu,
-  Newspaper,
   Search,
   Sparkles,
-  Store,
   X,
 } from "lucide-react";
-
-const navigation = [
-  { label: "Stores", href: "#stores", icon: Store },
-  { label: "Services", href: "#services", icon: Building2 },
-  { label: "Jobs", href: "#jobs", icon: BriefcaseBusiness },
-  { label: "News", href: "#news", icon: Newspaper },
-];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -84,7 +73,7 @@ export function SiteHeader() {
 
         <form
           onSubmit={handleSearch}
-          className="hidden flex-1 items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-2 lg:flex"
+          className="hidden w-full max-w-2xl items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-2 lg:flex"
         >
           <MapPin size={18} className="text-brand-dark" />
           <select
@@ -112,19 +101,6 @@ export function SiteHeader() {
             Search
           </button>
         </form>
-
-        <nav className="hidden items-center gap-1 xl:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-stone-600 transition hover:bg-brand/10 hover:text-stone-950"
-            >
-              <item.icon size={16} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
 
         <ListingModalButton
           kind="business"
@@ -180,17 +156,6 @@ export function SiteHeader() {
       {open ? (
         <div className="border-t border-stone-100 bg-white px-4 pb-4 xl:hidden">
           <nav className="mx-auto grid max-w-[1680px] gap-2 pt-3">
-            {navigation.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg border border-stone-100 px-3 py-3 text-sm font-semibold text-stone-700"
-              >
-                <item.icon size={18} className="text-brand-dark" />
-                {item.label}
-              </Link>
-            ))}
             <ListingModalButton
               kind="business"
               defaultType="Cafe"

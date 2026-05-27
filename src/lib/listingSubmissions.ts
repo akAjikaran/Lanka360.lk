@@ -13,6 +13,9 @@ export type ListingSubmissionInput = {
   description?: string;
   address: string;
   district: string;
+  googleMapsUrl?: string;
+  latitude?: number;
+  longitude?: number;
   imageName?: string;
 };
 
@@ -60,6 +63,9 @@ function toSupabaseRow(submission: ListingSubmission) {
     description: submission.description ?? null,
     address: submission.address,
     district: submission.district,
+    google_maps_url: submission.googleMapsUrl ?? null,
+    latitude: submission.latitude ?? null,
+    longitude: submission.longitude ?? null,
     image_name: submission.imageName ?? null,
     status: submission.status,
     created_at: submission.createdAt,
@@ -67,7 +73,13 @@ function toSupabaseRow(submission: ListingSubmission) {
 }
 
 function toLegacySupabaseRow(submission: ListingSubmission) {
-  const { whatsapp_normalized: _whatsappNormalized, ...row } = toSupabaseRow(submission);
+  const {
+    whatsapp_normalized: _whatsappNormalized,
+    google_maps_url: _googleMapsUrl,
+    latitude: _latitude,
+    longitude: _longitude,
+    ...row
+  } = toSupabaseRow(submission);
   return row;
 }
 
@@ -83,6 +95,9 @@ function fromSupabaseRow(row: Record<string, unknown>): ListingSubmission {
     description: typeof row.description === "string" ? row.description : undefined,
     address: String(row.address),
     district: String(row.district),
+    googleMapsUrl: typeof row.google_maps_url === "string" ? row.google_maps_url : undefined,
+    latitude: typeof row.latitude === "number" ? row.latitude : undefined,
+    longitude: typeof row.longitude === "number" ? row.longitude : undefined,
     imageName: typeof row.image_name === "string" ? row.image_name : undefined,
     status: row.status as ListingSubmission["status"],
     createdAt: String(row.created_at),
@@ -108,7 +123,12 @@ async function createSupabaseSubmission(submission: ListingSubmission) {
   if (!response.ok) {
     const errorText = await response.text();
 
-    if (errorText.includes("whatsapp_normalized")) {
+    if (
+      errorText.includes("whatsapp_normalized") ||
+      errorText.includes("google_maps_url") ||
+      errorText.includes("latitude") ||
+      errorText.includes("longitude")
+    ) {
       response = await fetch(`${supabaseUrl}/rest/v1/listing_submissions`, {
         method: "POST",
         headers: {
@@ -264,6 +284,9 @@ export async function updateListingSubmissionByOwner({
     description: input.description ?? null,
     address: input.address,
     district: input.district,
+    google_maps_url: input.googleMapsUrl ?? null,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
     image_name: input.imageName ?? null,
     status: "pending",
   };
@@ -341,6 +364,9 @@ export async function updateListingSubmissionByWhatsapp({
     description: input.description ?? null,
     address: input.address,
     district: input.district,
+    google_maps_url: input.googleMapsUrl ?? null,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
     image_name: input.imageName ?? null,
     status: "pending",
   };

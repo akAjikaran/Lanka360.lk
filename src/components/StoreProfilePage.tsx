@@ -36,6 +36,35 @@ function normalizeWhatsapp(value: string) {
   return digits;
 }
 
+function getGoogleMapsUrl(address: string, googleMapsUrl?: string, latitude?: number, longitude?: number) {
+  if (typeof latitude === "number" && typeof longitude === "number") {
+    return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  }
+
+  return googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+function getGoogleMapsEmbedUrl({
+  address,
+  googleMapsUrl,
+  latitude,
+  longitude,
+}: {
+  address: string;
+  googleMapsUrl?: string;
+  latitude?: number;
+  longitude?: number;
+}) {
+  if (typeof latitude === "number" && typeof longitude === "number") {
+    return `https://www.google.com/maps?q=${latitude},${longitude}&output=embed`;
+  }
+
+  const coordinates = googleMapsUrl?.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  const query = coordinates ? `${coordinates[1]},${coordinates[2]}` : address;
+
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+}
+
 export async function StoreProfilePage({ categorySlug, storeSlug }: { categorySlug: string; storeSlug: string }) {
   const category = getDirectoryItem("stores", categorySlug);
   const staticStore = getStoreListing(categorySlug, storeSlug);
@@ -63,6 +92,9 @@ export async function StoreProfilePage({ categorySlug, storeSlug }: { categorySl
       }
     : undefined);
   const isSubmittedStore = Boolean(approvedStore && !staticStore);
+  const storeGoogleMapsUrl = approvedStore?.googleMapsUrl;
+  const storeLatitude = approvedStore?.latitude;
+  const storeLongitude = approvedStore?.longitude;
 
   if (!category || !store) {
     notFound();
@@ -135,7 +167,7 @@ export async function StoreProfilePage({ categorySlug, storeSlug }: { categorySl
               Call Now
             </a>
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`}
+              href={getGoogleMapsUrl(store.address, storeGoogleMapsUrl, storeLatitude, storeLongitude)}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-3 text-sm font-black text-stone-950 shadow-sm"
             >
               <Navigation size={17} />
@@ -201,23 +233,27 @@ export async function StoreProfilePage({ categorySlug, storeSlug }: { categorySl
                   Location
                 </h2>
                 <div className="relative min-h-[360px] overflow-hidden rounded-lg border border-stone-200 bg-brand/10 sm:min-h-[520px]">
-                  <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(#d6d3d1_1px,transparent_1px),linear-gradient(90deg,#d6d3d1_1px,transparent_1px)] [background-size:36px_36px]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(29,203,121,0.45),transparent_16%),radial-gradient(circle_at_72%_58%,rgba(16,185,129,0.22),transparent_14%)]" />
+                  <iframe
+                    src={getGoogleMapsEmbedUrl({
+                      address: store.address,
+                      googleMapsUrl: storeGoogleMapsUrl,
+                      latitude: storeLatitude,
+                      longitude: storeLongitude,
+                    })}
+                    title={`${store.name} location`}
+                    className="absolute inset-0 size-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address)}`}
+                    href={getGoogleMapsUrl(store.address, storeGoogleMapsUrl, storeLatitude, storeLongitude)}
+                    target="_blank"
+                    rel="noreferrer"
                     className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-black text-blue-700 shadow-sm"
                   >
                     Open in Maps
                     <ExternalLink size={15} />
                   </a>
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <span className="mx-auto grid size-14 place-items-center rounded-full bg-stone-950 text-brand shadow-xl">
-                      <MapPin size={30} fill="currentColor" />
-                    </span>
-                    <p className="mt-3 rounded-full bg-white px-4 py-2 text-sm font-black text-stone-950 shadow-sm">
-                      {store.name}
-                    </p>
-                  </div>
                 </div>
               </section>
 
