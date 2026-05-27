@@ -50,8 +50,6 @@ function getKindForType(type: string): ListingKind {
   return "business";
 }
 
-const adminWhatsappNumber = "94787059476";
-
 export function ListingModalButton({
   kind = "business",
   defaultType = "Cafe",
@@ -86,30 +84,40 @@ export function ListingModalButton({
     const image = formData.get("image");
     const imageName = image instanceof File && image.size > 0 ? image.name : "";
     const resolvedKind = kind === "business" ? getKindForType(selectedFormType) : kind;
-    const listingRequest = [
-      "New Lanka360 Listing Request",
-      "",
-      `Type: ${resolvedKind}`,
-      `Category: ${selectedFormType}`,
-      `Business Name: ${String(formData.get("name") ?? "").trim()}`,
-      `District: ${String(formData.get("district") ?? "").trim()}`,
-      `Address: ${String(formData.get("address") ?? "").trim()}`,
-      `WhatsApp: ${whatsapp}`,
-      `Phone: ${phone || "-"}`,
-      `Description: ${String(formData.get("description") ?? "").trim() || "-"}`,
-      `Image file name: ${imageName || "-"}`,
-    ].join("\n");
 
     try {
-      const whatsappUrl = `https://wa.me/${adminWhatsappNumber}?text=${encodeURIComponent(listingRequest)}`;
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          kind: resolvedKind,
+          name: formData.get("name"),
+          type: selectedFormType,
+          whatsapp,
+          phone,
+          description: formData.get("description"),
+          address: formData.get("address"),
+          district: formData.get("district"),
+          imageName,
+        }),
+      });
+
+      const responseText = await response.text();
+      const result = responseText ? (JSON.parse(responseText) as { error?: string }) : {};
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not submit listing.");
+      }
+
       form.reset();
       setSameAsWhatsapp(false);
       setSubmitState("success");
-      setMessage("WhatsApp opened with your listing request. Send the message there and we will review it manually.");
+      setMessage("We received your request. We will review it and make it visible after approval.");
     } catch (error) {
       setSubmitState("error");
-      setMessage(error instanceof Error ? error.message : "Could not open WhatsApp.");
+      setMessage(error instanceof Error ? error.message : "Could not submit listing.");
     }
   };
 
@@ -254,8 +262,8 @@ export function ListingModalButton({
                 <div className="mt-4 flex gap-3 rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-sm leading-6 text-brand-dark">
                   <AlertTriangle className="mt-0.5 shrink-0" size={20} />
                   <p>
-                    <strong>Do not send copyright-protected images.</strong> WhatsApp will include the image file name in
-                    the request. You can attach the actual image in the WhatsApp chat after sending the message.
+                    <strong>Do not upload copyright-protected images.</strong> Use only your own original photos or
+                    properly licensed images. Copyrighted images will be rejected.
                   </p>
                 </div>
 
@@ -285,7 +293,7 @@ export function ListingModalButton({
                   disabled={submitState === "submitting"}
                   className="rounded-lg bg-emerald-600 px-6 py-3 text-base font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitState === "submitting" ? "Opening WhatsApp..." : "Send via WhatsApp"}
+                  {submitState === "submitting" ? "Submitting..." : "Submit Application"}
                 </button>
               </div>
             </form>

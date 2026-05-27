@@ -17,7 +17,7 @@ function clean(value: unknown) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const ownerToken = clean(body.ownerToken);
+    const ownerToken = clean(body.ownerToken) || crypto.randomUUID();
     const kind = clean(body.kind) as ListingSubmissionKind;
     const name = clean(body.name);
     const type = clean(body.type);
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid listing kind." }, { status: 400 });
     }
 
-    if (!ownerToken || !name || !type || !whatsapp || !address || !district) {
+    if (!name || !type || !whatsapp || !address || !district) {
       return NextResponse.json({ error: "Please fill all required fields." }, { status: 400 });
     }
 

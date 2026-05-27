@@ -15,7 +15,6 @@ import {
   Search,
   Sparkles,
   Store,
-  UserCircle,
   X,
 } from "lucide-react";
 
@@ -135,14 +134,6 @@ export function SiteHeader() {
           List Business
         </ListingModalButton>
 
-        <Link
-          href="/my-listings"
-          className="hidden size-10 place-items-center rounded-full border border-stone-200 bg-white text-stone-700 transition hover:border-brand hover:text-stone-950 sm:grid"
-          aria-label="My listings"
-        >
-          <UserCircle size={22} />
-        </Link>
-
         <button
           type="button"
           className="ml-auto grid size-10 place-items-center rounded-lg border border-stone-200 bg-white text-stone-950 xl:hidden"
@@ -207,14 +198,6 @@ export function SiteHeader() {
             >
               List Your Business
             </ListingModalButton>
-            <Link
-              href="/my-listings"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg border border-stone-100 px-3 py-3 text-sm font-semibold text-stone-700"
-            >
-              <UserCircle size={18} className="text-brand-dark" />
-              My Listings
-            </Link>
           </nav>
         </div>
       ) : null}
