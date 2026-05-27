@@ -132,9 +132,9 @@ export default async function SearchPage({
                 >
                   <Link
                     href={`${href}?location=${encodeURIComponent(location)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
-                    className="grid sm:grid-cols-[minmax(190px,36%)_1fr]"
+                    className="grid grid-cols-[96px_1fr] sm:grid-cols-[minmax(190px,36%)_1fr]"
                   >
-                    <div className="relative min-h-56 sm:h-full sm:min-h-48">
+                    <div className="relative h-full min-h-40 overflow-hidden rounded-l-[1.75rem] sm:min-h-48 sm:rounded-none">
                       <Image
                         src={listing.image}
                         alt={listing.name}
@@ -142,34 +142,34 @@ export default async function SearchPage({
                         sizes="(min-width: 1024px) 380px, 100vw"
                         className="object-cover"
                       />
-                      <span className="absolute left-5 top-5 rounded-full bg-white px-3 py-1 text-xs font-black text-stone-950 shadow-sm">
+                      <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[9px] font-black text-stone-950 shadow-sm sm:left-5 sm:top-5 sm:px-3 sm:py-1 sm:text-xs">
                         {item.label}
                       </span>
                       <span
-                        className={`absolute right-5 top-5 size-3 rounded-full ring-2 ring-white ${
+                        className={`absolute right-2 top-2 size-3 rounded-full ring-2 ring-white sm:right-5 sm:top-5 ${
                           listing.open ? "bg-emerald-500" : "bg-stone-400"
                         }`}
                       />
-                      <span className="absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm">
+                      <span className="hidden absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm sm:block">
                         {location}
                       </span>
                     </div>
 
-                    <div className="flex min-w-0 flex-col p-5 sm:p-6">
-                      <h2 className="line-clamp-1 text-xl font-black text-stone-950 sm:text-2xl">
+                    <div className="flex min-w-0 flex-col p-4 sm:p-6">
+                      <h2 className="line-clamp-2 text-base font-black text-stone-950 sm:line-clamp-1 sm:text-2xl">
                         {listing.name.replaceAll("Jaffna", location)}
                       </h2>
-                      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-3">
                         <span className="flex items-center gap-1 text-brand">
                           {Array.from({ length: 5 }).map((_, index) => (
-                            <Star key={index} size={16} fill="currentColor" />
+                            <Star key={index} size={14} fill="currentColor" />
                           ))}
                         </span>
                         <span className="text-sm font800 text-stone-700">{listing.rating}</span>
                         <span className="text-stone-300">•</span>
                         <span className="text-sm font800 text-stone-600">{listing.distance} km away</span>
                       </div>
-                      <p className="mt-4 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600">
+                      <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600 sm:mt-4">
                         <MapPin size={17} className="shrink-0 text-stone-400" />
                         <span className="line-clamp-1">{listing.address.replaceAll("Jaffna", location)}</span>
                       </p>

@@ -25,7 +25,7 @@ export function DistrictSelector({
   const [showAll, setShowAll] = useState(false);
 
   return (
-    <section className="mt-7">
+    <section className="mt-7 hidden sm:block">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-xl font-black text-stone-950">
           <Sparkles size={22} className="text-brand" />
