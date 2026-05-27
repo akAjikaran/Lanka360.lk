@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, Globe2, Menu, X } from "lucide-react";
@@ -9,6 +10,7 @@ import { categoryIconMap, groupIcons } from "@/components/ExploreSidebar";
 
 export function MobileExploreDrawer() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const [, activeSection, activeSlug] = pathname.split("/");
   const [locationQuery, setLocationQuery] = useState("");
@@ -56,6 +58,87 @@ export function MobileExploreDrawer() {
     }));
   };
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const drawer = open ? (
+    <div className="fixed inset-0 z-[999] lg:hidden" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        className="absolute inset-0 bg-stone-950/55"
+        aria-label="Close explore categories"
+        onClick={() => setOpen(false)}
+      />
+
+      <aside className="absolute inset-y-0 left-0 z-[1000] flex w-[86vw] max-w-sm flex-col bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-stone-200 px-4 py-4">
+          <div>
+            <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-brand-dark">
+              <Globe2 size={18} />
+              Explore
+            </p>
+            <h2 className="mt-1 text-xl font-black text-stone-950">Categories</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="grid size-10 place-items-center rounded-lg border border-stone-200 text-stone-700"
+            aria-label="Close explore categories"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-3">
+            {sidebarGroups.map((group) => {
+              const GroupIcon = groupIcons[group.title];
+              const isOpen = openGroups[group.title];
+
+              return (
+                <section key={group.title} className="rounded-lg border border-stone-200 bg-stone-50 p-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.title)}
+                    className="flex w-full items-center justify-between rounded-lg bg-white px-3 py-3 text-left text-sm font-black text-stone-950"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="grid size-9 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]">
+                        <GroupIcon size={19} />
+                      </span>
+                      {group.title}
+                    </span>
+                    {isOpen ? (
+                      <ChevronDown size={18} className="text-brand-dark" />
+                    ) : (
+                      <ChevronRight size={18} className="text-stone-400" />
+                    )}
+                  </button>
+
+                  {isOpen ? (
+                    <div className="mt-2 grid gap-1">
+                      {group.items.map((item) => (
+                        <MobileCategoryLink
+                          key={item[1]}
+                          href={`/${group.section}/${item[1]}${locationQuery}`}
+                          item={item}
+                          active={group.section === activeSection && item[1] === activeSlug}
+                          onClick={() => setOpen(false)}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </section>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+    </div>
+  ) : null;
+
   return (
     <>
       <button
@@ -67,8 +150,9 @@ export function MobileExploreDrawer() {
         <Menu size={22} />
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-[90] lg:hidden" role="dialog" aria-modal="true">
+      {mounted && drawer ? createPortal(drawer, document.body) : null}
+      {false && open ? (
+        <div className="fixed inset-0 z-[200] lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
             className="absolute inset-0 bg-stone-950/55"
@@ -76,7 +160,7 @@ export function MobileExploreDrawer() {
             onClick={() => setOpen(false)}
           />
 
-          <aside className="absolute inset-y-0 left-0 flex w-[86vw] max-w-sm flex-col bg-white shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 z-[201] flex w-[86vw] max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-stone-200 px-4 py-4">
               <div>
                 <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-brand-dark">
@@ -110,7 +194,7 @@ export function MobileExploreDrawer() {
                         aria-expanded={isOpen}
                       >
                         <span className="flex items-center gap-2">
-                          <span className="grid size-9 place-items-center bg-brand text-stone-950 [clip-path:polygon(25%_0%,75%_0%,100%_50%,75%_100%,25%_100%,0%_50%)]">
+                          <span className="grid size-9 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]">
                             <GroupIcon size={19} />
                           </span>
                           {group.title}

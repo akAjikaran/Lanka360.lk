@@ -142,7 +142,7 @@ export function ExploreSidebar({
                 aria-expanded={isOpen}
               >
                 <span className="flex items-center gap-2">
-                  <span className="grid size-8 place-items-center bg-brand text-stone-950 [clip-path:polygon(25%_0%,75%_0%,100%_50%,75%_100%,25%_100%,0%_50%)]">
+                  <span className="grid size-8 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]">
                     <GroupIcon size={17} />
                   </span>
                   {group.title}
