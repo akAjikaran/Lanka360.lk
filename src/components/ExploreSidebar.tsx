@@ -127,8 +127,8 @@ export function ExploreSidebar({
   };
 
   return (
-    <aside className="hidden rounded-lg border border-stone-200 bg-white p-3 shadow-sm lg:block">
-      <div className="mb-3 flex items-center gap-2 px-2 py-2 text-sm font-black uppercase tracking-[0.18em] text-brand-dark">
+    <aside className="hidden rounded-2xl border border-stone-200 bg-white p-3 lg:block">
+      <div className="mb-3 flex items-center gap-2 px-2 py-2 text-sm font-medium text-black">
         <Globe2 size={18} />
         Explore
       </div>
@@ -140,7 +140,7 @@ export function ExploreSidebar({
 
           if (singleGrowthItem) {
             return (
-              <div key={group.title} className="rounded-lg border border-stone-100 bg-stone-50/70 p-2">
+              <div key={group.title} className="rounded-2xl bg-canvas-soft p-2">
                 <SidebarItemLink
                   href={`/${group.section}/${singleGrowthItem[1]}${locationQuery}`}
                   item={singleGrowthItem}
@@ -152,15 +152,15 @@ export function ExploreSidebar({
           }
 
           return (
-            <div key={group.title} className="rounded-lg border border-stone-100 bg-stone-50/70 p-2">
+            <div key={group.title} className="rounded-2xl bg-canvas-soft p-2">
               <button
                 type="button"
                 onClick={() => toggleGroup(group.title)}
-                className="mb-2 flex w-full items-center justify-between rounded-md bg-white px-3 py-2 text-left text-sm font800 text-stone-900 transition hover:bg-brand/10"
+                className="mb-2 flex w-full items-center justify-between rounded-full bg-white px-3 py-2 text-left text-sm font-medium text-black transition hover:bg-brand/10"
                 aria-expanded={isOpen}
               >
                 <span className="flex items-center gap-2">
-                  <span className="grid size-8 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]">
+                  <span className="grid size-8 place-items-center rounded-full bg-brand text-black">
                     <GroupIcon size={17} />
                   </span>
                   {group.title}
@@ -210,13 +210,13 @@ function SidebarItemLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition hover:bg-brand/15 hover:text-stone-950 ${
-        active ? "bg-brand/15 font-black text-stone-950 ring-1 ring-brand/30" : "font-medium text-stone-600"
-      } ${variant === "group" ? "bg-white font800 text-stone-900" : ""}`}
+        active ? "bg-brand/15 font-medium text-black ring-1 ring-brand/30" : "font-medium text-stone-600"
+      } ${variant === "group" ? "bg-white text-black" : ""}`}
     >
       <span
         className={
           variant === "group"
-            ? "grid size-8 shrink-0 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]"
+            ? "grid size-8 shrink-0 place-items-center rounded-full bg-brand text-black"
             : `grid size-7 shrink-0 place-items-center rounded-lg ${item[7]}`
         }
       >

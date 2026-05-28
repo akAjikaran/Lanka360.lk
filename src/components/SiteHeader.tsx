@@ -55,17 +55,17 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200 bg-white/92 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1680px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-white">
+      <div className="mx-auto flex max-w-[1680px] items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <MobileExploreDrawer />
 
         <Link href="/" className="flex min-w-max items-center gap-2" aria-label="Lanka360 home">
-          <span className="grid size-10 place-items-center rounded-lg bg-brand text-stone-950 shadow-[0_8px_20px_rgba(29,203,121,0.35)]">
+          <span className="grid size-10 place-items-center rounded-full bg-brand text-black">
             <Sparkles size={22} strokeWidth={2.4} />
           </span>
           <span className="leading-none">
-            <span className="block text-xl font-black tracking-tight text-stone-950">Lanka360.lk</span>
-            <span className="hidden text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500 sm:block">
+            <span className="block text-xl font-bold text-black">Lanka360.lk</span>
+            <span className="hidden text-xs font-medium text-stone-500 sm:block">
               Local. Trusted. Nearby.
             </span>
           </span>
@@ -73,7 +73,7 @@ export function SiteHeader() {
 
         <form
           onSubmit={handleSearch}
-          className="hidden w-full max-w-2xl items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-2 lg:flex"
+          className="hidden w-full max-w-2xl items-center gap-2 rounded-full bg-canvas-soft px-3 py-2 lg:flex"
         >
           <MapPin size={18} className="text-brand-dark" />
           <select
@@ -96,7 +96,7 @@ export function SiteHeader() {
           />
           <button
             type="submit"
-            className="rounded-full bg-brand px-4 py-1.5 text-sm font-black text-stone-950 transition hover:bg-brand"
+            className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-black transition hover:bg-brand-dark"
           >
             Search
           </button>
@@ -106,7 +106,7 @@ export function SiteHeader() {
 
       <div className="border-t border-stone-100 px-4 py-3 lg:hidden">
         <form onSubmit={handleSearch} className="mx-auto grid max-w-[1680px] gap-2">
-          <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-2">
+          <div className="flex items-center gap-2 rounded-full bg-canvas-soft px-3 py-2">
             <MapPin size={18} className="text-brand-dark" />
             <select
               className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-stone-700 outline-none"
@@ -119,7 +119,7 @@ export function SiteHeader() {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-2">
+          <div className="flex items-center gap-2 rounded-full bg-canvas-soft px-3 py-2">
             <Search size={18} className="text-stone-400" />
             <input
               value={query}
@@ -129,7 +129,7 @@ export function SiteHeader() {
             />
             <button
               type="submit"
-              className="rounded-full bg-brand px-4 py-1.5 text-sm font-black text-stone-950"
+              className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-black"
             >
               Go
             </button>

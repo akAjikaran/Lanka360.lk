@@ -64,15 +64,15 @@ export function PrimaryCategoryCards({
           <Link
             key={card.href}
             href={withLocation(card.href)}
-            className={`rounded-lg border p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:shadow-md ${
-              active ? "border-brand bg-brand/15" : "border-stone-200 bg-white"
+            className={`rounded-2xl border p-4 text-center transition hover:border-brand ${
+              active ? "border-brand bg-brand/10" : "border-stone-200 bg-white"
             }`}
             aria-current={active ? "page" : undefined}
           >
-            <span className="mx-auto grid size-11 place-items-center rounded-lg bg-brand/15 text-brand-dark">
+            <span className="mx-auto grid size-11 place-items-center rounded-full bg-canvas-soft text-black">
               <CardIcon size={22} />
             </span>
-            <span className="mt-3 block text-sm font-black text-stone-900">{card.label}</span>
+            <span className="mt-3 block text-sm font-medium text-black">{card.label}</span>
           </Link>
         );
       })}

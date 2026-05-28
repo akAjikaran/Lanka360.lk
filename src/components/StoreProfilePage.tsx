@@ -243,7 +243,7 @@ export async function StoreProfilePage({ categorySlug, storeSlug }: { categorySl
                     href={getGoogleMapsUrl(store.address, storeGoogleMapsUrl, storeLatitude, storeLongitude)}
                     target="_blank"
                     rel="noreferrer"
-                    className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-black text-blue-700 shadow-sm"
+                    className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black shadow-sm"
                   >
                     Open in Maps
                     <ExternalLink size={15} />

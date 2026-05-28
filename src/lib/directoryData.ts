@@ -98,7 +98,7 @@ export const sidebarGroups: SidebarGroup[] = [
       ["Sweets & Snacks", "sweets-snacks", "sweet shop", "Sweet shops, snacks, desserts, cakes, and celebration treats.", 14, 10, "cake", "text-purple-700 bg-purple-100"],
       ["Restaurant", "restaurant", "restaurant", "Restaurants, rice shops, family dining, and local food places near you.", 22, 16, "building-storefront", "text-emerald-700 bg-emerald-100"],
       ["Grocery", "grocery", "grocery store", "Daily grocery stores, mini marts, and local food shops near you.", 28, 22, "shopping-bag", "text-green-700 bg-green-100"],
-      ["Dairy", "dairy", "dairy shop", "Fresh milk, curd, yoghurt, cheese, and dairy product sellers nearby.", 9, 7, "beaker", "text-blue-700 bg-blue-100"],
+      ["Dairy", "dairy", "dairy shop", "Fresh milk, curd, yoghurt, cheese, and dairy product sellers nearby.", 9, 7, "beaker", "text-brand-dark bg-brand/15"],
       ["Medical", "medical", "medical store", "Medical stores, pharmacies, health products, and wellness shops open near Jaffna.", 16, 13, "heart", "text-teal-700 bg-teal-100"],
       ["General Store", "general-store", "general store", "Everyday essentials, household goods, and neighborhood general stores.", 21, 17, "building-storefront", "text-stone-700 bg-stone-100"],
       ["Bakery", "bakery", "bakery", "Bakeries, cakes, bread, pastries, short eats, and fresh baked goods.", 15, 11, "cake", "text-brand-dark bg-brand/15"],
@@ -112,7 +112,7 @@ export const sidebarGroups: SidebarGroup[] = [
     items: [
       ["Home Repair", "home-repair", "home repair service", "Electricians, plumbers, carpenters, and home repair teams.", 15, 11, "wrench", "text-slate-700 bg-slate-100"],
       ["Beauty", "beauty", "beauty service", "Salons, spas, bridal makeup, and grooming services near you.", 18, 12, "sparkles", "text-pink-700 bg-pink-100"],
-      ["Vehicle Care", "vehicle-care", "vehicle care service", "Garages, washes, mechanics, tire shops, and vehicle services.", 20, 16, "truck", "text-blue-700 bg-blue-100"],
+      ["Vehicle Care", "vehicle-care", "vehicle care service", "Garages, washes, mechanics, tire shops, and vehicle services.", 20, 16, "truck", "text-brand-dark bg-brand/15"],
       ["IT Support", "it-support", "IT support service", "Laptop, network, software, and business IT support providers.", 12, 9, "computer", "text-indigo-700 bg-indigo-100"],
       ["Education", "education", "education service", "Tuition classes, institutes, tutors, and training centers.", 23, 15, "academic-cap", "text-violet-700 bg-violet-100"],
       ["Healthcare", "healthcare", "healthcare service", "Clinics, labs, doctors, and healthcare service providers.", 14, 10, "heart", "text-emerald-700 bg-emerald-100"],

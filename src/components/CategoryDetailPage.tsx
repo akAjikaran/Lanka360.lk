@@ -15,7 +15,6 @@ import {
   MessageCircle,
   Phone,
   Plus,
-  Search,
   SlidersHorizontal,
   Star,
   Store,
@@ -173,19 +172,15 @@ export async function CategoryDetailPage({
               </p>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="flex justify-start sm:justify-end">
               <ListingModalButton
                 kind={section === "services" ? "service" : section === "stores" ? "store" : "growth"}
                 defaultType={item.label}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-stone-950 px-4 py-3 text-sm font-black text-brand transition hover:bg-stone-800"
+                className="inline-flex min-h-12 w-50 h-14 items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-black transition hover:bg-brand-dark"
               >
-                <Plus size={17} />
+                <Plus size={15} />
                 List Your {section === "stores" ? "Store" : "Page"}
               </ListingModalButton>
-              <div className="flex min-h-12 items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-500">
-                <Search size={17} />
-                Search within {item.label}
-              </div>
             </div>
           </div>
 
