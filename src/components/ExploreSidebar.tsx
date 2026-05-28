@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Globe2, Rocket, Store, Wrench, type LucideIcon } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight, Globe2, Rocket, Store, Tags, Wrench, type LucideIcon } from "lucide-react";
 import { sidebarGroups, type DirectorySection } from "@/lib/directoryData";
+import { allSriLankaLocation } from "@/lib/locationData";
 import {
   AcademicCapIcon,
   BeakerIcon,
@@ -34,7 +35,9 @@ import type { ComponentType, SVGProps } from "react";
 export const groupIcons: Record<string, LucideIcon> = {
   "Local Stores": Store,
   "Local Services": Wrench,
-  Growth: Rocket,
+  "Sri Lankan Startups": Rocket,
+  "Tools and Product Hub": Tags,
+  "Local Events": CalendarDays,
 };
 
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -76,7 +79,6 @@ export function ExploreSidebar({
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     "Local Stores": activeSection ? activeSection === "stores" : true,
     "Local Services": activeSection === "services",
-    Growth: activeSection === "growth",
   });
   const [locationQuery, setLocationQuery] = useState("");
 
@@ -85,7 +87,7 @@ export function ExploreSidebar({
       const locationFromEvent =
         event instanceof CustomEvent && typeof event.detail?.location === "string" ? event.detail.location : undefined;
       const location = locationFromEvent ?? new URLSearchParams(window.location.search).get("location");
-      setLocationQuery(location ? `?location=${encodeURIComponent(location)}` : "");
+      setLocationQuery(location && location !== allSriLankaLocation ? `?location=${encodeURIComponent(location)}` : "");
     };
 
     updateLocationQuery();
@@ -103,7 +105,9 @@ export function ExploreSidebar({
       return;
     }
 
-    const activeGroup = sidebarGroups.find((group) => group.section === activeSection);
+    const activeGroup = sidebarGroups.find(
+      (group) => group.section === activeSection && (!activeSlug || group.items.some((item) => item[1] === activeSlug))
+    );
 
     if (!activeGroup) {
       return;
@@ -130,8 +134,22 @@ export function ExploreSidebar({
       </div>
       <div className="space-y-3">
         {sidebarGroups.map((group) => {
+          const singleGrowthItem = group.section === "growth" && group.items.length === 1 ? group.items[0] : undefined;
           const isOpen = openGroups[group.title];
           const GroupIcon = groupIcons[group.title];
+
+          if (singleGrowthItem) {
+            return (
+              <div key={group.title} className="rounded-lg border border-stone-100 bg-stone-50/70 p-2">
+                <SidebarItemLink
+                  href={`/${group.section}/${singleGrowthItem[1]}${locationQuery}`}
+                  item={singleGrowthItem}
+                  active={group.section === activeSection && singleGrowthItem[1] === activeSlug}
+                  variant="group"
+                />
+              </div>
+            );
+          }
 
           return (
             <div key={group.title} className="rounded-lg border border-stone-100 bg-stone-50/70 p-2">
@@ -178,10 +196,12 @@ function SidebarItemLink({
   href,
   item,
   active = false,
+  variant = "item",
 }: {
   href: string;
   item: (typeof sidebarGroups)[number]["items"][number];
   active?: boolean;
+  variant?: "item" | "group";
 }) {
   const Icon = categoryIconMap[item[6]] ?? CircleStackIcon;
 
@@ -191,9 +211,15 @@ function SidebarItemLink({
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition hover:bg-brand/15 hover:text-stone-950 ${
         active ? "bg-brand/15 font-black text-stone-950 ring-1 ring-brand/30" : "font-medium text-stone-600"
-      }`}
+      } ${variant === "group" ? "bg-white font800 text-stone-900" : ""}`}
     >
-      <span className={`grid size-7 shrink-0 place-items-center rounded-lg ${item[7]}`}>
+      <span
+        className={
+          variant === "group"
+            ? "grid size-8 shrink-0 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]"
+            : `grid size-7 shrink-0 place-items-center rounded-lg ${item[7]}`
+        }
+      >
         <Icon className="size-4" />
       </span>
       <span>{item[0]}</span>

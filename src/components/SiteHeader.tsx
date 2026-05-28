@@ -3,20 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ListingModalButton } from "@/components/ListingModalButton";
 import { MobileExploreDrawer } from "@/components/MobileExploreDrawer";
-import { sriLankanDistricts } from "@/lib/locationData";
+import { allSriLankaLocation, defaultLocation, sriLankanLocationOptions } from "@/lib/locationData";
 import {
   MapPin,
-  Menu,
   Search,
   Sparkles,
-  X,
 } from "lucide-react";
 
 export function SiteHeader() {
-  const [open, setOpen] = useState(false);
-  const [district, setDistrict] = useState("Jaffna");
+  const [district, setDistrict] = useState(defaultLocation);
   const [query, setQuery] = useState("");
   const router = useRouter();
   const pathname = usePathname();
@@ -25,9 +21,7 @@ export function SiteHeader() {
     const params = new URLSearchParams(window.location.search);
     const location = params.get("location");
 
-    if (location && sriLankanDistricts.includes(location)) {
-      setDistrict(location);
-    }
+    setDistrict(location && sriLankanLocationOptions.includes(location) ? location : defaultLocation);
   }, [pathname]);
 
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
@@ -35,13 +29,14 @@ export function SiteHeader() {
 
     const trimmedQuery = query.trim();
     const params = new URLSearchParams();
-    params.set("location", district);
+    if (district !== allSriLankaLocation) {
+      params.set("location", district);
+    }
 
     if (trimmedQuery) {
       params.set("q", trimmedQuery);
     }
 
-    setOpen(false);
     router.push(`/search?${params.toString()}`);
   };
 
@@ -49,8 +44,13 @@ export function SiteHeader() {
     setDistrict(value);
 
     const params = new URLSearchParams(window.location.search);
-    params.set("location", value);
-    router.push(`${pathname}?${params.toString()}`);
+    if (value === allSriLankaLocation) {
+      params.delete("location");
+    } else {
+      params.set("location", value);
+    }
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
     window.dispatchEvent(new CustomEvent("lanka360:location-change", { detail: { location: value } }));
   };
 
@@ -82,7 +82,7 @@ export function SiteHeader() {
             onChange={(event) => handleDistrictChange(event.target.value)}
             aria-label="Select Sri Lankan district"
           >
-            {sriLankanDistricts.map((item) => (
+            {sriLankanLocationOptions.map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
@@ -102,22 +102,6 @@ export function SiteHeader() {
           </button>
         </form>
 
-        <ListingModalButton
-          kind="business"
-          defaultType="Cafe"
-          className="ml-auto hidden rounded-full bg-stone-950 px-5 py-2.5 text-sm font800 text-brand transition hover:bg-stone-800 sm:inline-flex"
-        >
-          List Business
-        </ListingModalButton>
-
-        <button
-          type="button"
-          className="ml-auto grid size-10 place-items-center rounded-lg border border-stone-200 bg-white text-stone-950 xl:hidden"
-          onClick={() => setOpen((value) => !value)}
-          aria-label="Toggle navigation menu"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
       </div>
 
       <div className="border-t border-stone-100 px-4 py-3 lg:hidden">
@@ -130,7 +114,7 @@ export function SiteHeader() {
               onChange={(event) => handleDistrictChange(event.target.value)}
               aria-label="Select Sri Lankan district"
             >
-              {sriLankanDistricts.map((item) => (
+              {sriLankanLocationOptions.map((item) => (
                 <option key={item}>{item}</option>
               ))}
             </select>
@@ -152,20 +136,6 @@ export function SiteHeader() {
           </div>
         </form>
       </div>
-
-      {open ? (
-        <div className="border-t border-stone-100 bg-white px-4 pb-4 xl:hidden">
-          <nav className="mx-auto grid max-w-[1680px] gap-2 pt-3">
-            <ListingModalButton
-              kind="business"
-              defaultType="Cafe"
-              className="rounded-lg bg-stone-950 px-4 py-3 text-center text-sm font-bold text-brand"
-            >
-              List Your Business
-            </ListingModalButton>
-          </nav>
-        </div>
-      ) : null}
     </header>
   );
 }

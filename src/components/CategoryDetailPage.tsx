@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { DistrictSelector } from "@/components/DistrictSelector";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
 import { ListingModalButton } from "@/components/ListingModalButton";
+import { PrimaryCategoryCards } from "@/components/PrimaryCategoryCards";
 import {
   ArrowLeft,
   ArrowRight,
   BriefcaseBusiness,
-  ChevronRight,
   CircleDot,
   Info,
   MapPin,
@@ -34,12 +34,12 @@ import {
   getApprovedListingSubmissions,
   type ListingSubmissionKind,
 } from "@/lib/listingSubmissions";
-import { sriLankanDistricts } from "@/lib/locationData";
+import { allSriLankaLocation, defaultLocation, sriLankanDistricts } from "@/lib/locationData";
 
 const sectionLabel: Record<DirectorySection, string> = {
   stores: "Stores",
   services: "Services",
-  growth: "Growth",
+  growth: "Categories",
 };
 
 const sectionIcon = {
@@ -58,11 +58,20 @@ const districtImages = [
 ];
 
 function buildDistricts(counts: Record<string, number>) {
-  return sriLankanDistricts.map((name, index) => ({
-    name,
-    count: counts[name] ?? 0,
-    image: districtImages[index % districtImages.length],
-  }));
+  const totalCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
+
+  return [
+    {
+      name: allSriLankaLocation,
+      count: totalCount,
+      image: "https://images.unsplash.com/photo-1588598198321-9735fd52455b?q=80&w=500&auto=format&fit=crop",
+    },
+    ...sriLankanDistricts.map((name, index) => ({
+      name,
+      count: counts[name] ?? 0,
+      image: districtImages[index % districtImages.length],
+    })),
+  ];
 }
 
 const listingKindBySection: Record<DirectorySection, ListingSubmissionKind> = {
@@ -88,7 +97,7 @@ function normalizePhoneForWhatsapp(value: string) {
 export async function CategoryDetailPage({
   section,
   slug,
-  location = "Jaffna",
+  location = defaultLocation,
 }: {
   section: DirectorySection;
   slug: string;
@@ -101,10 +110,11 @@ export async function CategoryDetailPage({
   }
 
   const Icon = sectionIcon[section];
+  const selectedDistrict = location === allSriLankaLocation ? undefined : location;
   const approvedSubmissions = await getApprovedListingSubmissions({
     kind: listingKindBySection[section],
     type: item.label,
-    district: location,
+    district: selectedDistrict,
   });
   const districtCounts = await getApprovedListingSubmissionDistrictCounts({
     kind: listingKindBySection[section],
@@ -128,7 +138,9 @@ export async function CategoryDetailPage({
   const related = directoryItems.filter((entry) => entry.section === section && entry.slug !== slug).slice(0, 6);
   const getListingHref = (listingSlug: string) =>
     section === "growth" ? `/${section}/${slug}` : `/${section}/${slug}/${listingSlug}`;
-  const withLocation = (href: string) => `${href}?location=${encodeURIComponent(location)}`;
+  const withLocation = (href: string) =>
+    selectedDistrict ? `${href}?location=${encodeURIComponent(selectedDistrict)}` : href;
+  const localizeText = (value: string) => (selectedDistrict ? value.replaceAll("Jaffna", selectedDistrict) : value);
 
   return (
     <div className="min-h-screen">
@@ -136,15 +148,7 @@ export async function CategoryDetailPage({
         <ExploreSidebar activeSection={section} activeSlug={slug} />
 
         <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
-          <nav className="mb-5 flex items-center gap-2 rounded-lg bg-brand/10 px-3 py-3 text-sm font800 text-stone-500">
-            <Link href="/" className="text-brand-dark">
-              Home
-            </Link>
-            <ChevronRight size={15} />
-            <span>{sectionLabel[section]}</span>
-            <ChevronRight size={15} />
-            <span className="text-stone-950">{item.label}</span>
-          </nav>
+          <PrimaryCategoryCards activeSection={section} activeSlug={slug} withLocation={withLocation} />
 
           <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
             <div>
@@ -162,7 +166,10 @@ export async function CategoryDetailPage({
                 <span className="min-w-0">Explore Local {item.label}</span>
               </h1>
               <p className="mt-2 hidden max-w-3xl text-sm font-semibold leading-6 text-stone-500 sm:block">
-                {item.description.replaceAll("Jaffna", location)} Showing results around {location} District within 10 km.
+                {localizeText(item.description)}{" "}
+                {selectedDistrict
+                  ? `Showing results around ${selectedDistrict} District within 10 km.`
+                  : "Showing results across Sri Lanka."}
               </p>
             </div>
 
@@ -228,7 +235,7 @@ export async function CategoryDetailPage({
                           }`}
                         />
                         <span className="hidden absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm sm:block">
-                          {location}
+                          {selectedDistrict ?? allSriLankaLocation}
                         </span>
                       </div>
                     </Link>
@@ -236,7 +243,7 @@ export async function CategoryDetailPage({
                     <div className="flex min-w-0 flex-col p-4 sm:p-6">
                       <Link href={withLocation(getListingHref(listing.slug))} className="block min-w-0">
                         <h3 className="line-clamp-2 text-base font-black text-stone-950 sm:line-clamp-1 sm:text-2xl">
-                          {listing.name.replaceAll("Jaffna", location)}
+                          {localizeText(listing.name)}
                         </h3>
                         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-3">
                           <span className="flex items-center gap-1 text-brand">
@@ -252,7 +259,7 @@ export async function CategoryDetailPage({
                         </div>
                         <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600 sm:mt-4">
                           <MapPin size={17} className="shrink-0 text-stone-400" />
-                          <span className="line-clamp-1">{listing.address.replaceAll("Jaffna", location)}</span>
+                          <span className="line-clamp-1">{localizeText(listing.address)}</span>
                         </p>
                       </Link>
 

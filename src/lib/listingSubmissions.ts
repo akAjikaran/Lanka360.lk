@@ -623,14 +623,17 @@ export async function getApprovedListingSubmissionBySlug({
   });
 }
 
-export async function getApprovedListingSubmissionsByDistrict(district: string) {
+export async function getApprovedListingSubmissionsByDistrict(district?: string) {
   if (supabaseUrl && supabaseServiceRoleKey) {
     const params = new URLSearchParams({
       select: "*",
       status: "eq.approved",
-      district: `eq.${district}`,
       order: "created_at.desc",
     });
+
+    if (district) {
+      params.set("district", `eq.${district}`);
+    }
 
     const response = await fetch(`${supabaseUrl}/rest/v1/listing_submissions?${params.toString()}`, {
       headers: {
@@ -650,5 +653,5 @@ export async function getApprovedListingSubmissionsByDistrict(district: string) 
 
   const submissions = await readSubmissions();
 
-  return submissions.filter((submission) => submission.status === "approved" && submission.district === district);
+  return submissions.filter((submission) => submission.status === "approved" && (!district || submission.district === district));
 }

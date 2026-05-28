@@ -2,9 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
+import { PrimaryCategoryCards } from "@/components/PrimaryCategoryCards";
 import {
+  ArrowLeft,
   Camera,
-  ChevronRight,
   Clock3,
   Download,
   ExternalLink,
@@ -106,19 +107,14 @@ export async function ServiceProfilePage({ categorySlug, serviceSlug }: { catego
         <ExploreSidebar activeSection="services" activeSlug={categorySlug} />
 
         <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
-          <nav className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-brand/10 px-3 py-3 text-sm font800 text-stone-500">
-            <Link href="/" className="text-brand-dark">
-              Home
-            </Link>
-            <ChevronRight size={15} />
-            <span>Services</span>
-            <ChevronRight size={15} />
-            <Link href={`/services/${category.slug}`} className="text-brand-dark">
-              {category.label}
-            </Link>
-            <ChevronRight size={15} />
-            <span className="text-stone-950">{service.name}</span>
-          </nav>
+          <PrimaryCategoryCards activeSection="services" activeSlug={categorySlug} />
+          <Link
+            href={`/services/${category.slug}`}
+            className="-mt-2 mb-4 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-black text-stone-700 transition hover:border-brand hover:text-stone-950"
+          >
+            <ArrowLeft size={16} />
+            Back to {category.label}
+          </Link>
 
           <section className="overflow-hidden rounded-lg bg-brand/15">
             <div className="relative flex min-h-[420px] flex-col items-center justify-center px-5 py-10 text-center">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
+import { allSriLankaLocation } from "@/lib/locationData";
 
 type District = {
   name: string;
@@ -41,18 +42,22 @@ export function DistrictSelector({
       </div>
 
       <div
-        className={`-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 transition-[max-height] duration-300 sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-hidden sm:px-0 md:grid-cols-6 xl:grid-cols-8 ${
+        className={`-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-2 transition-[max-height] duration-300 sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-x-1.5 sm:gap-y-3 sm:overflow-hidden sm:px-0 md:grid-cols-6 xl:grid-cols-8 ${
           showAll ? "sm:max-h-[720px]" : "sm:max-h-32"
         }`}
       >
         {districts.map((district) => (
           <Link
             key={district.name}
-            href={`/${section}/${slug}?location=${encodeURIComponent(district.name)}`}
-            className="min-w-24 text-center sm:min-w-0"
+            href={
+              district.name === allSriLankaLocation
+                ? `/${section}/${slug}`
+                : `/${section}/${slug}?location=${encodeURIComponent(district.name)}`
+            }
+            className="min-w-20 text-center sm:min-w-0"
           >
             <span
-              className={`relative mx-auto block size-20 overflow-hidden rounded-full border-4 shadow-sm sm:size-24 ${
+              className={`relative mx-auto block size-16 overflow-hidden rounded-xl border-4 shadow-sm sm:size-20 ${
                 district.name === location ? "border-brand" : "border-brand/20"
               }`}
             >

@@ -10,7 +10,7 @@ import type { ListingSubmission, ListingSubmissionKind } from "@/lib/listingSubm
 const kindLabels: Record<ListingSubmissionKind, string> = {
   store: "Store",
   service: "Service",
-  growth: "Growth",
+  growth: "Category",
   business: "Business",
 };
 

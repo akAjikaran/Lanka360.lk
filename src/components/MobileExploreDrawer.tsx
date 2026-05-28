@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, Globe2, Menu, X } from "lucide-react";
 import { sidebarGroups } from "@/lib/directoryData";
 import { categoryIconMap, groupIcons } from "@/components/ExploreSidebar";
+import { allSriLankaLocation } from "@/lib/locationData";
 
 export function MobileExploreDrawer() {
   const [open, setOpen] = useState(false);
@@ -17,11 +18,12 @@ export function MobileExploreDrawer() {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     "Local Stores": true,
     "Local Services": true,
-    Growth: true,
   });
 
   useEffect(() => {
-    const activeGroup = sidebarGroups.find((group) => group.section === activeSection);
+    const activeGroup = sidebarGroups.find(
+      (group) => group.section === activeSection && (!activeSlug || group.items.some((item) => item[1] === activeSlug))
+    );
 
     if (!activeGroup) {
       return;
@@ -38,7 +40,7 @@ export function MobileExploreDrawer() {
       const locationFromEvent =
         event instanceof CustomEvent && typeof event.detail?.location === "string" ? event.detail.location : undefined;
       const location = locationFromEvent ?? new URLSearchParams(window.location.search).get("location");
-      setLocationQuery(location ? `?location=${encodeURIComponent(location)}` : "");
+      setLocationQuery(location && location !== allSriLankaLocation ? `?location=${encodeURIComponent(location)}` : "");
     };
 
     updateLocationQuery();
@@ -93,8 +95,23 @@ export function MobileExploreDrawer() {
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-3">
             {sidebarGroups.map((group) => {
+              const singleGrowthItem = group.section === "growth" && group.items.length === 1 ? group.items[0] : undefined;
               const GroupIcon = groupIcons[group.title];
               const isOpen = openGroups[group.title];
+
+              if (singleGrowthItem) {
+                return (
+                  <section key={group.title} className="rounded-lg border border-stone-200 bg-stone-50 p-2">
+                    <MobileCategoryLink
+                      href={`/${group.section}/${singleGrowthItem[1]}${locationQuery}`}
+                      item={singleGrowthItem}
+                      active={group.section === activeSection && singleGrowthItem[1] === activeSlug}
+                      onClick={() => setOpen(false)}
+                      variant="group"
+                    />
+                  </section>
+                );
+              }
 
               return (
                 <section key={group.title} className="rounded-lg border border-stone-200 bg-stone-50 p-2">
@@ -236,11 +253,13 @@ function MobileCategoryLink({
   item,
   active = false,
   onClick,
+  variant = "item",
 }: {
   href: string;
   item: (typeof sidebarGroups)[number]["items"][number];
   active?: boolean;
   onClick: () => void;
+  variant?: "item" | "group";
 }) {
   const Icon = categoryIconMap[item[6]];
 
@@ -254,7 +273,13 @@ function MobileCategoryLink({
       }`}
     >
       <span className="flex min-w-0 items-center gap-3">
-        <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${item[7]}`}>
+        <span
+          className={
+            variant === "group"
+              ? "grid size-9 shrink-0 place-items-center bg-brand text-stone-950 [clip-path:polygon(30%_0%,70%_0%,100%_30%,100%_70%,70%_100%,30%_100%,0%_70%,0%_30%)]"
+              : `grid size-9 shrink-0 place-items-center rounded-lg ${item[7]}`
+          }
+        >
           <Icon className="size-5" />
         </span>
         <span className="truncate">{item[0]}</span>

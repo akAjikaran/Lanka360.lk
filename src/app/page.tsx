@@ -4,42 +4,47 @@ import { ListingModalButton } from "@/components/ListingModalButton";
 import {
   ArrowRight,
   BadgeCheck,
-  BriefcaseBusiness,
   CalendarDays,
   CircleDollarSign,
-  Factory,
   Flame,
   Globe2,
-  Home,
-  Hotel,
   MapPin,
   Megaphone,
   MessageCircle,
-  Newspaper,
-  Radio,
   Rocket,
   Search,
   ShieldCheck,
-  ShoppingBag,
   Store,
   Tags,
-  Utensils,
   Wrench,
 } from "lucide-react";
 
 const categoryTiles = [
-  { label: "Stores", icon: ShoppingBag },
-  { label: "Services", icon: Wrench },
-  { label: "Restaurants", icon: Utensils },
-  { label: "Hotels", icon: Hotel },
-  { label: "Real Estate", icon: Home },
-  { label: "Products", icon: Tags },
-  { label: "Events", icon: CalendarDays },
-  { label: "Jobs", icon: BriefcaseBusiness },
-  { label: "News", icon: Newspaper },
-  { label: "Startups", icon: Rocket },
-  { label: "Radio", icon: Radio },
-  { label: "Factories", icon: Factory },
+  {
+    label: "Local Store Discovery",
+    href: "/stores/cafe",
+    icon: Store,
+  },
+  {
+    label: "Local Service Providers",
+    href: "/services/home-repair",
+    icon: Wrench,
+  },
+  {
+    label: "Sri Lankan Startups",
+    href: "/growth/startups",
+    icon: Rocket,
+  },
+  {
+    label: "Tools and Product Hub",
+    href: "/growth/products",
+    icon: Tags,
+  },
+  {
+    label: "Local Events",
+    href: "/growth/events",
+    icon: CalendarDays,
+  },
 ];
 
 const featuredListings = [
@@ -136,11 +141,11 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section id="categories" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          <section id="categories" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {categoryTiles.map((item) => (
               <a
                 key={item.label}
-                href="#stores"
+                href={item.href}
                 className="rounded-lg border border-stone-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:shadow-md"
               >
                 <span className="mx-auto grid size-11 place-items-center rounded-lg bg-brand/15 text-brand-dark">

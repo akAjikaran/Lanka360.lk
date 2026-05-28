@@ -1,3 +1,6 @@
+export const allSriLankaLocation = "All Sri Lanka";
+export const defaultLocation = allSriLankaLocation;
+
 export const sriLankanDistricts = [
   "Ampara",
   "Anuradhapura",
@@ -25,3 +28,5 @@ export const sriLankanDistricts = [
   "Trincomalee",
   "Vavuniya",
 ];
+
+export const sriLankanLocationOptions = [allSriLankaLocation, ...sriLankanDistricts];

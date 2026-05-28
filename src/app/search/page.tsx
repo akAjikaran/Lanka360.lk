@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
 import { buildListings, directoryItems, findBestSearchMatch, toSlug, type DirectoryListing } from "@/lib/directoryData";
 import { getApprovedListingSubmissionsByDistrict, type ListingSubmissionKind } from "@/lib/listingSubmissions";
+import { allSriLankaLocation, defaultLocation } from "@/lib/locationData";
 import { MapPin, Search, Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +22,27 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = params.q?.trim() ?? "";
-  const location = params.location?.trim() || "Jaffna";
+  const location = params.location?.trim() || defaultLocation;
+  const selectedDistrict = location === allSriLankaLocation ? undefined : location;
   const normalizedQuery = query.toLowerCase();
   const activeMatch = findBestSearchMatch(query);
   const [, activeSection, activeSlug] = activeMatch?.href.split("/") ?? [];
-  const approvedSubmissions = await getApprovedListingSubmissionsByDistrict(location);
+  const approvedSubmissions = await getApprovedListingSubmissionsByDistrict(selectedDistrict);
+  const localizeText = (value: string) => (selectedDistrict ? value.replaceAll("Jaffna", selectedDistrict) : value);
+  const withSearchParams = (href: string) => {
+    const queryParams = new URLSearchParams();
+
+    if (selectedDistrict) {
+      queryParams.set("location", selectedDistrict);
+    }
+
+    if (query) {
+      queryParams.set("q", query);
+    }
+
+    const queryString = queryParams.toString();
+    return queryString ? `${href}?${queryString}` : href;
+  };
 
   const staticResults = directoryItems
     .flatMap((item) =>
@@ -39,8 +56,8 @@ export default async function SearchPage({
         return true;
       }
 
-      const localizedName = listing.name.replaceAll("Jaffna", location).toLowerCase();
-      const localizedAddress = listing.address.replaceAll("Jaffna", location).toLowerCase();
+      const localizedName = localizeText(listing.name).toLowerCase();
+      const localizedAddress = localizeText(listing.address).toLowerCase();
 
       return (
         item.label.toLowerCase().includes(normalizedQuery) ||
@@ -107,7 +124,7 @@ export default async function SearchPage({
             </h1>
             <p className="mt-2 flex items-center gap-2 text-sm font800 text-stone-600">
               <MapPin size={16} className="text-brand-dark" />
-              Showing near {location}, Sri Lanka
+              {selectedDistrict ? `Showing near ${selectedDistrict}, Sri Lanka` : "Showing across Sri Lanka"}
             </p>
           </div>
 
@@ -131,7 +148,7 @@ export default async function SearchPage({
                   className="overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-sm transition hover:border-brand hover:shadow-md"
                 >
                   <Link
-                    href={`${href}?location=${encodeURIComponent(location)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+                    href={withSearchParams(href)}
                     className="grid grid-cols-[96px_1fr] sm:grid-cols-[minmax(190px,36%)_1fr]"
                   >
                     <div className="relative h-full min-h-40 overflow-hidden rounded-l-[1.75rem] sm:min-h-48 sm:rounded-none">
@@ -151,13 +168,13 @@ export default async function SearchPage({
                         }`}
                       />
                       <span className="hidden absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm sm:block">
-                        {location}
+                        {selectedDistrict ?? allSriLankaLocation}
                       </span>
                     </div>
 
                     <div className="flex min-w-0 flex-col p-4 sm:p-6">
                       <h2 className="line-clamp-2 text-base font-black text-stone-950 sm:line-clamp-1 sm:text-2xl">
-                        {listing.name.replaceAll("Jaffna", location)}
+                        {localizeText(listing.name)}
                       </h2>
                       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-3">
                         <span className="flex items-center gap-1 text-brand">
@@ -171,7 +188,7 @@ export default async function SearchPage({
                       </div>
                       <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600 sm:mt-4">
                         <MapPin size={17} className="shrink-0 text-stone-400" />
-                        <span className="line-clamp-1">{listing.address.replaceAll("Jaffna", location)}</span>
+                        <span className="line-clamp-1">{localizeText(listing.address)}</span>
                       </p>
                     </div>
                   </Link>

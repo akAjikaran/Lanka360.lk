@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
-import { sriLankanDistricts } from "@/lib/locationData";
+import { allSriLankaLocation, defaultLocation, sriLankanLocationOptions } from "@/lib/locationData";
 
 export function LocationFilter({
   location,
@@ -16,11 +16,13 @@ export function LocationFilter({
   const router = useRouter();
 
   const applyLocation = () => {
-    router.push(`${basePath}?location=${encodeURIComponent(selectedLocation)}`);
+    router.push(
+      selectedLocation === allSriLankaLocation ? basePath : `${basePath}?location=${encodeURIComponent(selectedLocation)}`
+    );
   };
 
   const clearLocation = () => {
-    setSelectedLocation("Jaffna");
+    setSelectedLocation(defaultLocation);
     router.push(basePath);
   };
 
@@ -38,12 +40,14 @@ export function LocationFilter({
             onChange={(event) => setSelectedLocation(event.target.value)}
             className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-3 text-base font-black text-stone-950 outline-none focus:border-brand focus:ring-4 focus:ring-brand/20"
           >
-            {sriLankanDistricts.map((district) => (
+            {sriLankanLocationOptions.map((district) => (
               <option key={district}>{district}</option>
             ))}
           </select>
           <p className="mt-2 text-sm font-medium text-stone-500">
-            Results will update for {selectedLocation} District, Sri Lanka.
+            {selectedLocation === allSriLankaLocation
+              ? "Results will show all Sri Lanka."
+              : `Results will update for ${selectedLocation} District, Sri Lanka.`}
           </p>
         </div>
         <div className="flex gap-2">
