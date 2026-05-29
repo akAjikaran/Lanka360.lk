@@ -185,6 +185,7 @@ export function ListingModalButton({
           type: selectedFormType,
           whatsapp,
           phone,
+          brandColor: formData.get("brandColor"),
           description: formData.get("description"),
           address: formData.get("address"),
           district: formData.get("district"),
@@ -337,6 +338,19 @@ export function ListingModalButton({
                       />
                       Same as WhatsApp
                     </label>
+                  </Field>
+
+                  <Field label="Primary Brand Color">
+                    <div className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-2">
+                      <input
+                        name="brandColor"
+                        type="color"
+                        defaultValue="#49A619"
+                        className="h-11 w-16 shrink-0 cursor-pointer rounded border border-stone-200 bg-white"
+                        aria-label="Primary brand color"
+                      />
+                      <span className="text-sm font-semibold text-stone-500">Used on your visiting card design.</span>
+                    </div>
                   </Field>
                 </div>
 

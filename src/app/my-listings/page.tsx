@@ -208,6 +208,7 @@ export default function MyListingsPage() {
         type: formData.get("type"),
         whatsapp: formData.get("whatsapp"),
         phone: formData.get("phone"),
+        brandColor: formData.get("brandColor"),
         description: formData.get("description"),
         address: formData.get("address"),
         district: formData.get("district"),
@@ -386,6 +387,14 @@ export default function MyListingsPage() {
                 </Field>
                 <Field label="Phone">
                   <input name="phone" className="form-input" defaultValue={editingListing.phone ?? ""} />
+                </Field>
+                <Field label="Primary Brand Color">
+                  <input
+                    name="brandColor"
+                    type="color"
+                    className="h-[58px] w-full cursor-pointer rounded-lg border border-stone-200 bg-white p-2"
+                    defaultValue={editingListing.brandColor ?? "#49A619"}
+                  />
                 </Field>
                 <Field label="District">
                   <div className="relative">

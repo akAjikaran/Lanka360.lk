@@ -1,25 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DistrictSelector } from "@/components/DistrictSelector";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
 import { ListingModalButton } from "@/components/ListingModalButton";
+import { ListingVisitingCard } from "@/components/ListingVisitingCard";
 import { PrimaryCategoryCards } from "@/components/PrimaryCategoryCards";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BriefcaseBusiness,
-  CircleDot,
-  Info,
-  MapPin,
-  MessageCircle,
-  Phone,
-  Plus,
-  SlidersHorizontal,
-  Star,
-  Store,
-  Wrench,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CircleDot, Plus, SlidersHorizontal, Store, Wrench } from "lucide-react";
 import {
   buildListings,
   directoryItems,
@@ -79,20 +65,6 @@ const listingKindBySection: Record<DirectorySection, ListingSubmissionKind> = {
   growth: "growth",
 };
 
-function normalizePhoneForWhatsapp(value: string) {
-  const digits = value.replace(/\D/g, "");
-
-  if (digits.startsWith("94")) {
-    return digits;
-  }
-
-  if (digits.startsWith("0")) {
-    return `94${digits.slice(1)}`;
-  }
-
-  return digits;
-}
-
 export async function CategoryDetailPage({
   section,
   slug,
@@ -131,6 +103,7 @@ export async function CategoryDetailPage({
     image: item.image,
     phone: submission.phone || submission.whatsapp,
     whatsapp: submission.whatsapp,
+    brandColor: submission.brandColor,
     website: "#",
   }));
   const listings = [...approvedListings, ...buildListings(item)];
@@ -167,7 +140,7 @@ export async function CategoryDetailPage({
               <p className="mt-2 hidden max-w-3xl text-sm font-semibold leading-6 text-stone-500 sm:block">
                 {localizeText(item.description)}{" "}
                 {selectedDistrict
-                  ? `Showing results around ${selectedDistrict} District within 10 km.`
+                  ? `Showing results around ${selectedDistrict} District.`
                   : "Showing results across Sri Lanka."}
               </p>
             </div>
@@ -176,7 +149,7 @@ export async function CategoryDetailPage({
               <ListingModalButton
                 kind={section === "services" ? "service" : section === "stores" ? "store" : "growth"}
                 defaultType={item.label}
-                className="inline-flex min-h-12 w-50 h-14 items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-black transition hover:bg-brand-dark"
+                className="inline-flex min-h-12 h-14 w-50 items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-black transition hover:bg-brand-dark"
               >
                 <Plus size={15} />
                 List Your {section === "stores" ? "Store" : "Page"}
@@ -199,84 +172,22 @@ export async function CategoryDetailPage({
               </button>
             </div>
 
-            <div className="mt-4 flex items-start gap-2 rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs leading-5 text-stone-500">
-              <Info size={16} className="mt-0.5 shrink-0" />
-              Sorted by <strong className="text-stone-700">distance from your location</strong>, then by verified listings,
-              ratings, and reviews.
+            <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs leading-5 text-stone-500">
+              Showing local listings with direct contact details.
             </div>
 
-            <div className="mt-4 grid gap-4 2xl:grid-cols-2">
+            <div className="mt-4 grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
               {listings.map((listing) => (
-                <article
+                <ListingVisitingCard
                   key={listing.name}
-                  className="overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-sm transition hover:border-brand hover:shadow-md"
-                >
-                  <div className="grid grid-cols-[96px_1fr] sm:grid-cols-[minmax(190px,36%)_1fr]">
-                    <Link href={withLocation(getListingHref(listing.slug))} className="block">
-                      <div className="relative h-full min-h-40 overflow-hidden rounded-l-[1.75rem] sm:min-h-48 sm:rounded-none">
-                        <Image
-                          src={listing.image}
-                          alt={listing.name}
-                          fill
-                          sizes="(min-width: 1024px) 380px, 100vw"
-                          className="object-cover"
-                        />
-                        <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[9px] font-black text-stone-950 shadow-sm sm:left-5 sm:top-5 sm:px-3 sm:py-1 sm:text-[10px]">
-                          LK
-                        </span>
-                        <span
-                          className={`absolute right-2 top-2 size-3 rounded-full ring-2 ring-white sm:right-5 sm:top-5 ${
-                            listing.open ? "bg-emerald-500" : "bg-stone-400"
-                          }`}
-                        />
-                        <span className="hidden absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm sm:block">
-                          {selectedDistrict ?? allSriLankaLocation}
-                        </span>
-                      </div>
-                    </Link>
-
-                    <div className="flex min-w-0 flex-col p-4 sm:p-6">
-                      <Link href={withLocation(getListingHref(listing.slug))} className="block min-w-0">
-                        <h3 className="line-clamp-2 text-base font-black text-stone-950 sm:line-clamp-1 sm:text-2xl">
-                          {localizeText(listing.name)}
-                        </h3>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-3">
-                          <span className="flex items-center gap-1 text-brand">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                              <Star key={index} size={14} fill="currentColor" />
-                            ))}
-                          </span>
-                          <span className="text-sm font800 text-stone-700">
-                            {listing.rating} ({listing.reviews})
-                          </span>
-                          <span className="text-stone-300">•</span>
-                          <span className="text-sm font800 text-stone-600">{listing.distance} km away</span>
-                        </div>
-                        <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600 sm:mt-4">
-                          <MapPin size={17} className="shrink-0 text-stone-400" />
-                          <span className="line-clamp-1">{localizeText(listing.address)}</span>
-                        </p>
-                      </Link>
-
-                      <div className="mt-4 flex flex-wrap items-center justify-start gap-2 sm:mt-auto sm:justify-end sm:gap-3">
-                        <a
-                          href={`tel:${listing.phone}`}
-                          className="inline-flex size-10 items-center justify-center rounded-full border border-stone-200 text-emerald-700 transition hover:border-emerald-600 sm:size-12"
-                          aria-label="Call"
-                        >
-                          <Phone size={18} />
-                        </a>
-                        <a
-                          href={`https://wa.me/${normalizePhoneForWhatsapp(listing.whatsapp ?? listing.phone)}`}
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-black text-stone-950 shadow-sm transition hover:bg-brand-dark sm:px-5 sm:py-3"
-                        >
-                          <MessageCircle size={17} />
-                          WhatsApp
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </article>
+                  href={withLocation(getListingHref(listing.slug))}
+                  name={localizeText(listing.name)}
+                  address={localizeText(listing.address)}
+                  phone={listing.phone}
+                  whatsapp={listing.whatsapp}
+                  district={selectedDistrict ?? allSriLankaLocation}
+                  brandColor={listing.brandColor}
+                />
               ))}
             </div>
 

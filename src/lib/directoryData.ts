@@ -23,6 +23,7 @@ export type DirectoryListing = {
   image: string;
   phone: string;
   whatsapp?: string;
+  brandColor?: string;
   website: string;
 };
 
@@ -258,6 +259,7 @@ export function buildListings(item: DirectoryItem): DirectoryListing[] {
     image: item.image,
     phone: "+94 77 000 0000",
     whatsapp: "+94 77 000 0000",
+    brandColor: "#49A619",
     website: `https://lanka360.lk/${item.section}/${item.slug}/${slugify(name)}`,
   }));
 }

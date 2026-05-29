@@ -10,6 +10,7 @@ export type ListingSubmissionInput = {
   type: string;
   whatsapp: string;
   phone?: string;
+  brandColor?: string;
   description?: string;
   address: string;
   district: string;
@@ -29,6 +30,7 @@ const submissionsFilePath = path.join(process.cwd(), "data", "listing-submission
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const isProduction = process.env.NODE_ENV === "production";
+const defaultBrandColor = "#49A619";
 
 function assertProductionStorageConfigured() {
   if (isProduction && (!supabaseUrl || !supabaseServiceRoleKey)) {
@@ -50,6 +52,10 @@ export function normalizeWhatsapp(value: string) {
   return digits;
 }
 
+function normalizeBrandColor(value?: string) {
+  return value && /^#[0-9a-fA-F]{6}$/.test(value) ? value : defaultBrandColor;
+}
+
 function toSupabaseRow(submission: ListingSubmission) {
   return {
     id: submission.id,
@@ -60,6 +66,7 @@ function toSupabaseRow(submission: ListingSubmission) {
     whatsapp: submission.whatsapp,
     whatsapp_normalized: normalizeWhatsapp(submission.whatsapp),
     phone: submission.phone ?? null,
+    brand_color: normalizeBrandColor(submission.brandColor),
     description: submission.description ?? null,
     address: submission.address,
     district: submission.district,
@@ -92,6 +99,7 @@ function fromSupabaseRow(row: Record<string, unknown>): ListingSubmission {
     type: String(row.type),
     whatsapp: String(row.whatsapp),
     phone: typeof row.phone === "string" ? row.phone : undefined,
+    brandColor: normalizeBrandColor(typeof row.brand_color === "string" ? row.brand_color : undefined),
     description: typeof row.description === "string" ? row.description : undefined,
     address: String(row.address),
     district: String(row.district),
@@ -172,6 +180,7 @@ async function readSubmissions() {
 export async function createListingSubmission(input: ListingSubmissionInput) {
   const submission: ListingSubmission = {
     ...input,
+    brandColor: normalizeBrandColor(input.brandColor),
     id: crypto.randomUUID(),
     status: "pending",
     createdAt: new Date().toISOString(),
@@ -281,6 +290,7 @@ export async function updateListingSubmissionByOwner({
     whatsapp: input.whatsapp,
     whatsapp_normalized: normalizeWhatsapp(input.whatsapp),
     phone: input.phone ?? null,
+    brand_color: normalizeBrandColor(input.brandColor),
     description: input.description ?? null,
     address: input.address,
     district: input.district,
@@ -328,6 +338,7 @@ export async function updateListingSubmissionByOwner({
   const updated: ListingSubmission = {
     ...submissions[index],
     ...input,
+    brandColor: normalizeBrandColor(input.brandColor),
     ownerToken,
     status: "pending",
   };
@@ -361,6 +372,7 @@ export async function updateListingSubmissionByWhatsapp({
     whatsapp: input.whatsapp,
     whatsapp_normalized: normalizeWhatsapp(input.whatsapp),
     phone: input.phone ?? null,
+    brand_color: normalizeBrandColor(input.brandColor),
     description: input.description ?? null,
     address: input.address,
     district: input.district,
@@ -410,6 +422,7 @@ export async function updateListingSubmissionByWhatsapp({
   const updated: ListingSubmission = {
     ...submissions[index],
     ...input,
+    brandColor: normalizeBrandColor(input.brandColor),
     ownerToken: submissions[index].ownerToken,
     status: "pending",
   };

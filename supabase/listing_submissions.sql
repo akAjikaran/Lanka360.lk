@@ -7,6 +7,7 @@ create table if not exists public.listing_submissions (
   whatsapp text not null,
   whatsapp_normalized text,
   phone text,
+  brand_color text,
   description text,
   address text not null,
   district text not null,
@@ -26,6 +27,9 @@ alter table public.listing_submissions
 
 alter table public.listing_submissions
   add column if not exists whatsapp_normalized text;
+
+alter table public.listing_submissions
+  add column if not exists brand_color text;
 
 alter table public.listing_submissions
   add column if not exists google_maps_url text;

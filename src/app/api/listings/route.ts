@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     const type = clean(body.type);
     const whatsapp = clean(body.whatsapp);
     const phone = clean(body.phone);
+    const brandColor = clean(body.brandColor);
     const description = clean(body.description);
     const address = clean(body.address);
     const district = clean(body.district);
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
       type,
       whatsapp,
       phone: phone || undefined,
+      brandColor: brandColor || undefined,
       description: description || undefined,
       address,
       district,

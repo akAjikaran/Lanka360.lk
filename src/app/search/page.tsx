@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
+import { ListingVisitingCard } from "@/components/ListingVisitingCard";
 import { buildListings, directoryItems, findBestSearchMatch, toSlug, type DirectoryListing } from "@/lib/directoryData";
 import { getApprovedListingSubmissionsByDistrict, type ListingSubmissionKind } from "@/lib/listingSubmissions";
 import { allSriLankaLocation, defaultLocation } from "@/lib/locationData";
-import { MapPin, Search, Star } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +88,7 @@ export default async function SearchPage({
         image: item.image,
         phone: submission.phone || submission.whatsapp,
         whatsapp: submission.whatsapp,
+        brandColor: submission.brandColor,
         website: "#",
       };
 
@@ -111,7 +112,10 @@ export default async function SearchPage({
   return (
     <div className="min-h-screen">
       <section className="mx-auto grid max-w-[1680px] gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[300px_1fr] lg:px-8 lg:py-6">
-        <ExploreSidebar activeSection={activeSection === "stores" || activeSection === "services" || activeSection === "growth" ? activeSection : undefined} activeSlug={activeSlug} />
+        <ExploreSidebar
+          activeSection={activeSection === "stores" || activeSection === "services" || activeSection === "growth" ? activeSection : undefined}
+          activeSlug={activeSlug}
+        />
 
         <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="rounded-lg bg-brand/10 p-4">
@@ -137,62 +141,22 @@ export default async function SearchPage({
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-4 2xl:grid-cols-2">
+          <div className="mt-4 grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
             {results.map(({ item, listing }) => {
               const href =
                 item.section === "growth" ? `/${item.section}/${item.slug}` : `/${item.section}/${item.slug}/${listing.slug}`;
 
               return (
-                <article
+                <ListingVisitingCard
                   key={`${item.slug}-${listing.slug}`}
-                  className="overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-sm transition hover:border-brand hover:shadow-md"
-                >
-                  <Link
-                    href={withSearchParams(href)}
-                    className="grid grid-cols-[96px_1fr] sm:grid-cols-[minmax(190px,36%)_1fr]"
-                  >
-                    <div className="relative h-full min-h-40 overflow-hidden rounded-l-[1.75rem] sm:min-h-48 sm:rounded-none">
-                      <Image
-                        src={listing.image}
-                        alt={listing.name}
-                        fill
-                        sizes="(min-width: 1024px) 380px, 100vw"
-                        className="object-cover"
-                      />
-                      <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[9px] font-black text-stone-950 shadow-sm sm:left-5 sm:top-5 sm:px-3 sm:py-1 sm:text-xs">
-                        {item.label}
-                      </span>
-                      <span
-                        className={`absolute right-2 top-2 size-3 rounded-full ring-2 ring-white sm:right-5 sm:top-5 ${
-                          listing.open ? "bg-emerald-500" : "bg-stone-400"
-                        }`}
-                      />
-                      <span className="hidden absolute bottom-5 left-5 rounded-full bg-brand px-4 py-1.5 text-xs font-black text-stone-950 shadow-sm sm:block">
-                        {selectedDistrict ?? allSriLankaLocation}
-                      </span>
-                    </div>
-
-                    <div className="flex min-w-0 flex-col p-4 sm:p-6">
-                      <h2 className="line-clamp-2 text-base font-black text-stone-950 sm:line-clamp-1 sm:text-2xl">
-                        {localizeText(listing.name)}
-                      </h2>
-                      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-3">
-                        <span className="flex items-center gap-1 text-brand">
-                          {Array.from({ length: 5 }).map((_, index) => (
-                            <Star key={index} size={14} fill="currentColor" />
-                          ))}
-                        </span>
-                        <span className="text-sm font800 text-stone-700">{listing.rating}</span>
-                        <span className="text-stone-300">•</span>
-                        <span className="text-sm font800 text-stone-600">{listing.distance} km away</span>
-                      </div>
-                      <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold leading-5 text-stone-600 sm:mt-4">
-                        <MapPin size={17} className="shrink-0 text-stone-400" />
-                        <span className="line-clamp-1">{localizeText(listing.address)}</span>
-                      </p>
-                    </div>
-                  </Link>
-                </article>
+                  href={withSearchParams(href)}
+                  name={localizeText(listing.name)}
+                  address={localizeText(listing.address)}
+                  phone={listing.phone}
+                  whatsapp={listing.whatsapp}
+                  district={selectedDistrict ?? allSriLankaLocation}
+                  brandColor={listing.brandColor}
+                />
               );
             })}
           </div>
