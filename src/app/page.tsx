@@ -22,27 +22,27 @@ import {
 const categoryTiles = [
   {
     label: "Local Store Discovery",
-    href: "/stores/cafe",
+    href: "/categories/stores",
     icon: Store,
   },
   {
     label: "Local Service Providers",
-    href: "/services/home-repair",
+    href: "/categories/services",
     icon: Wrench,
   },
   {
     label: "Sri Lankan Startups",
-    href: "/growth/startups",
+    href: "/categories/startups",
     icon: Rocket,
   },
   {
     label: "Tools and Product Hub",
-    href: "/growth/products",
+    href: "/categories/products",
     icon: Tags,
   },
   {
     label: "Local Events",
-    href: "/growth/events",
+    href: "/categories/events",
     icon: CalendarDays,
   },
 ];
@@ -74,8 +74,8 @@ export default function HomePage() {
       <section className="mx-auto grid max-w-[1680px] gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[300px_1fr] lg:px-8 lg:py-6">
         <ExploreSidebar />
 
-        <div className="space-y-4">
-          <section className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+        <div className="flex flex-col gap-4">
+          <section className="order-2 overflow-hidden rounded-2xl border border-stone-200 bg-white lg:order-1">
             <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.2fr_0.8fr] lg:p-9">
               <div className="flex flex-col justify-center">
                 <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-canvas-soft px-4 py-2 text-sm font-medium text-black">
@@ -140,22 +140,22 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section id="categories" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <section id="categories" className="order-1 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:order-2 xl:grid-cols-5">
             {categoryTiles.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="rounded-2xl border border-stone-200 bg-white p-4 text-center transition hover:border-brand"
+                className="rounded-xl border border-stone-200 bg-white p-3 text-center transition hover:border-brand sm:rounded-2xl sm:p-4"
               >
                 <span className="mx-auto grid size-11 place-items-center rounded-full bg-canvas-soft text-black">
                   <item.icon size={22} />
                 </span>
-                <span className="mt-3 block text-sm font-medium text-black">{item.label}</span>
+                <span className="mt-3 block text-xs font-medium leading-4 text-black sm:text-sm">{item.label}</span>
               </a>
             ))}
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-3">
+          <section className="order-3 grid gap-4 lg:grid-cols-3">
             {[
               {
                 title: "Find Near You",
@@ -183,7 +183,7 @@ export default function HomePage() {
             ))}
           </section>
 
-          <section id="list-business" className="rounded-lg border border-stone-200 bg-stone-950 p-5 text-white shadow-sm sm:p-7">
+          <section id="list-business" className="order-4 rounded-lg border border-stone-200 bg-stone-950 p-5 text-white shadow-sm sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-center">
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full bg-brand px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-stone-950">

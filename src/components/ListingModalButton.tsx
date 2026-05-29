@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, MouseEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
 import {
   AlertTriangle,
   Bold,
@@ -9,8 +9,6 @@ import {
   Link as LinkIcon,
   List,
   ListOrdered,
-  LocateFixed,
-  MapPin,
   Store,
   Underline,
   X,
@@ -51,92 +49,6 @@ function getKindForType(type: string): ListingKind {
   return "business";
 }
 
-const defaultMapLocation = { latitude: 7.8731, longitude: 80.7718 };
-const mapZoom = 8;
-const tileSize = 256;
-
-function projectLocation(latitude: number, longitude: number, zoom: number) {
-  const scale = tileSize * 2 ** zoom;
-  const sinLatitude = Math.sin((latitude * Math.PI) / 180);
-
-  return {
-    x: ((longitude + 180) / 360) * scale,
-    y: (0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI)) * scale,
-  };
-}
-
-function unprojectLocation(x: number, y: number, zoom: number) {
-  const scale = tileSize * 2 ** zoom;
-  const longitude = (x / scale) * 360 - 180;
-  const latitudeRadians = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / scale)));
-
-  return {
-    latitude: (latitudeRadians * 180) / Math.PI,
-    longitude,
-  };
-}
-
-function MapPicker({
-  value,
-  onChange,
-}: {
-  value: { latitude: number; longitude: number } | null;
-  onChange: (location: { latitude: number; longitude: number }) => void;
-}) {
-  const center = value ?? defaultMapLocation;
-  const centerPixel = projectLocation(center.latitude, center.longitude, mapZoom);
-  const centerTileX = Math.floor(centerPixel.x / tileSize);
-  const centerTileY = Math.floor(centerPixel.y / tileSize);
-  const tileOffsets = [-2, -1, 0, 1, 2];
-
-  const handleMapClick = (event: MouseEvent<HTMLDivElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = centerPixel.x + event.clientX - (bounds.left + bounds.width / 2);
-    const y = centerPixel.y + event.clientY - (bounds.top + bounds.height / 2);
-
-    onChange(unprojectLocation(x, y, mapZoom));
-  };
-
-  return (
-    <div
-      className="relative mt-4 h-72 cursor-crosshair overflow-hidden rounded-lg border border-stone-200 bg-stone-200"
-      onClick={handleMapClick}
-      role="button"
-      tabIndex={0}
-      aria-label="Select listing location on map"
-    >
-      {tileOffsets.flatMap((offsetX) =>
-        tileOffsets.map((offsetY) => {
-          const tileX = centerTileX + offsetX;
-          const tileY = centerTileY + offsetY;
-
-          return (
-            <img
-              key={`${tileX}-${tileY}`}
-              src={`https://tile.openstreetmap.org/${mapZoom}/${tileX}/${tileY}.png`}
-              alt=""
-              className="absolute size-64 select-none"
-              draggable={false}
-              style={{
-                left: `calc(50% + ${tileX * tileSize - centerPixel.x}px)`,
-                top: `calc(50% + ${tileY * tileSize - centerPixel.y}px)`,
-              }}
-            />
-          );
-        })
-      )}
-      {value ? (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
-          <MapPin size={38} className="fill-red-600 text-red-700 drop-shadow-lg" />
-        </div>
-      ) : null}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-white/90 px-3 py-2 text-xs font-semibold text-stone-600">
-        Tap the map to select the store or service location. Map data © OpenStreetMap contributors.
-      </div>
-    </div>
-  );
-}
-
 export function ListingModalButton({
   kind = "business",
   defaultType = "Cafe",
@@ -153,8 +65,6 @@ export function ListingModalButton({
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [successAlert, setSuccessAlert] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationMessage, setLocationMessage] = useState("");
 
   const noun = kind === "service" ? "Service" : kind === "store" ? "Store" : "Business";
   const lowerNoun = noun.toLowerCase();
@@ -190,8 +100,6 @@ export function ListingModalButton({
           address: formData.get("address"),
           district: formData.get("district"),
           googleMapsUrl: formData.get("googleMapsUrl"),
-          latitude: selectedLocation?.latitude,
-          longitude: selectedLocation?.longitude,
         }),
       });
 
@@ -204,8 +112,6 @@ export function ListingModalButton({
 
       form.reset();
       setSameAsWhatsapp(false);
-      setSelectedLocation(null);
-      setLocationMessage("");
       setSubmitState("idle");
       setMessage("");
       setOpen(false);
@@ -219,7 +125,6 @@ export function ListingModalButton({
   const openModal = () => {
     setSubmitState("idle");
     setMessage("");
-    setLocationMessage("");
     setOpen(true);
   };
 
@@ -227,29 +132,6 @@ export function ListingModalButton({
     setOpen(false);
     setSubmitState("idle");
     setMessage("");
-    setLocationMessage("");
-  };
-
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationMessage("Location is not supported by this browser.");
-      return;
-    }
-
-    setLocationMessage("Detecting your current location...");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setSelectedLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocationMessage("Location selected from your current position.");
-      },
-      () => {
-        setLocationMessage("Could not detect location. Select it on the map instead.");
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
   };
 
   return (
@@ -401,34 +283,6 @@ export function ListingModalButton({
                     placeholder="Paste your Google Maps share link"
                   />
                 </Field>
-
-                <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-sm font-black uppercase tracking-[0.14em] text-stone-500">Map Location</h3>
-                      <p className="mt-1 text-sm font-semibold text-stone-600">
-                        Use your current location or tap the map to place the pin.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={useCurrentLocation}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-stone-950 px-4 py-3 text-sm font-black text-brand shadow-sm"
-                    >
-                      <LocateFixed size={18} />
-                      Use Current Location
-                    </button>
-                  </div>
-                  <MapPicker value={selectedLocation} onChange={setSelectedLocation} />
-                  <input type="hidden" name="latitude" value={selectedLocation?.latitude ?? ""} />
-                  <input type="hidden" name="longitude" value={selectedLocation?.longitude ?? ""} />
-                  <p className="mt-3 min-h-5 text-sm font800 text-brand-dark">
-                    {locationMessage ||
-                      (selectedLocation
-                        ? `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`
-                        : "No map location selected yet.")}
-                  </p>
-                </div>
 
                 <div className="mt-7 flex gap-3 rounded-lg border border-brand/40 bg-brand/10 px-4 py-3 text-sm leading-6 text-brand-dark">
                   <AlertTriangle className="mt-0.5 shrink-0" size={20} />
