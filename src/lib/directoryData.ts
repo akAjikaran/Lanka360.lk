@@ -84,7 +84,7 @@ export function toSlug(value: string) {
 
 export const sidebarGroups: SidebarGroup[] = [
   {
-    title: "Local Stores",
+    title: "Sri Lankan Business",
     section: "stores" as const,
     items: [
       ["Cafe", "cafe", "cafe", "Find local cafes, coffee shops, bakeries, and cool bars near Jaffna.", 13, 10, "cup", "text-brand-dark bg-brand/15"],
@@ -108,7 +108,7 @@ export const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
-    title: "Local Services",
+    title: "Sri Lankan Services",
     section: "services" as const,
     items: [
       ["Home Repair", "home-repair", "home repair service", "Electricians, plumbers, carpenters, and home repair teams.", 15, 11, "wrench", "text-slate-700 bg-slate-100"],

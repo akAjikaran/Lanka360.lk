@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Globe2, Menu, X } from "lucide-react";
 import { sidebarGroups } from "@/lib/directoryData";
 import { categoryIconMap, groupIcons } from "@/components/ExploreSidebar";
@@ -13,11 +13,12 @@ export function MobileExploreDrawer() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const [, activeSection, activeSlug] = pathname.split("/");
   const [locationQuery, setLocationQuery] = useState("");
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    "Local Stores": true,
-    "Local Services": true,
+    "Sri Lankan Business": true,
+    "Sri Lankan Services": true,
   });
 
   useEffect(() => {
@@ -63,6 +64,27 @@ export function MobileExploreDrawer() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const currentParams = new URLSearchParams(window.location.search);
+
+    if (currentParams.get("explore") !== "1") {
+      return;
+    }
+
+    setOpen(true);
+    setOpenGroups(
+      sidebarGroups.reduce<Record<string, boolean>>((groups, group) => {
+        groups[group.title] =
+          group.section === activeSection && (!activeSlug || group.items.some((item) => item[1] === activeSlug));
+        return groups;
+      }, {})
+    );
+
+    currentParams.delete("explore");
+    const nextQuery = currentParams.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+  }, [activeSection, activeSlug, pathname, router]);
 
   const drawer = open ? (
     <div className="fixed inset-0 z-[999] lg:hidden" role="dialog" aria-modal="true">

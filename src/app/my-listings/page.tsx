@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronDown, Edit3, RefreshCw, Trash2 } from "lucide-react";
 import { sidebarGroups } from "@/lib/directoryData";
 import { sriLankanDistricts } from "@/lib/locationData";
 import type { ListingSubmission, ListingSubmissionKind } from "@/lib/listingSubmissions";
+import {
+  deleteListingSubmission,
+  getOwnerListings,
+  sendListingOtp,
+  updateListingSubmission,
+  verifyListingOtp,
+} from "@/services/lanka360Api";
 
 const kindLabels: Record<ListingSubmissionKind, string> = {
   store: "Store",
@@ -44,7 +51,7 @@ function getTypeOptions(kind: ListingSubmissionKind) {
 }
 
 export default function MyListingsPage() {
-  const [ownerToken, setOwnerToken] = useState("");
+  const [ownerToken] = useState(() => (typeof window === "undefined" ? "" : getOwnerToken()));
   const [verifiedWhatsapp, setVerifiedWhatsapp] = useState("");
   const [verificationToken, setVerificationToken] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -60,7 +67,7 @@ export default function MyListingsPage() {
     [editingId, listings]
   );
 
-  const loadListings = async (token = ownerToken) => {
+  const loadListings = useCallback(async (token = ownerToken) => {
     if (!token) {
       return;
     }
@@ -68,24 +75,24 @@ export default function MyListingsPage() {
     setLoading(true);
     setMessage("");
 
-    const response = await fetch(`/api/listings?ownerToken=${encodeURIComponent(token)}`);
-    const result = (await response.json()) as { listings?: ListingSubmission[]; error?: string };
-
-    if (!response.ok) {
-      setMessage(result.error ?? "Could not load listings.");
-      setListings([]);
-    } else {
+    try {
+      const result = await getOwnerListings(token);
       setListings(result.listings ?? []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not load listings.");
+      setListings([]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-  };
+  }, [ownerToken]);
 
   useEffect(() => {
-    const token = getOwnerToken();
-    setOwnerToken(token);
-    void loadListings(token);
-  }, []);
+    const timer = window.setTimeout(() => {
+      void loadListings(ownerToken);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadListings, ownerToken]);
 
   const sendOtpForAction = async (type: "edit" | "delete", listing: ListingSubmission) => {
     setPendingAction({ type, listing });
@@ -93,23 +100,14 @@ export default function MyListingsPage() {
     setDevCode("");
     setMessage("");
 
-    const response = await fetch("/api/otp/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ whatsapp: listing.whatsapp }),
-    });
-
-    const result = (await response.json()) as { error?: string; devCode?: string };
-
-    if (!response.ok) {
-      setMessage(result.error ?? "Could not send OTP.");
+    try {
+      const result = await sendListingOtp(listing.whatsapp);
+      setDevCode(result.devCode ?? "");
+      setMessage("Enter the OTP sent to your WhatsApp number.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not send OTP.");
       return;
     }
-
-    setDevCode(result.devCode ?? "");
-    setMessage("Enter the OTP sent to your WhatsApp number.");
   };
 
   const verifyOtp = async () => {
@@ -117,21 +115,15 @@ export default function MyListingsPage() {
       return;
     }
 
-    const response = await fetch("/api/otp/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    let result: { verificationToken: string };
+
+    try {
+      result = await verifyListingOtp({
         whatsapp: pendingAction.listing.whatsapp,
         code: otpCode,
-      }),
-    });
-
-    const result = (await response.json()) as { error?: string; verificationToken?: string };
-
-    if (!response.ok || !result.verificationToken) {
-      setMessage(result.error ?? "Invalid OTP.");
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Invalid OTP.");
       return;
     }
 
@@ -169,17 +161,14 @@ export default function MyListingsPage() {
   };
 
   const performDelete = async (listing: ListingSubmission, token = verificationToken) => {
-    const response = await fetch(
-      `/api/listings/${listing.id}?whatsapp=${encodeURIComponent(listing.whatsapp)}&verificationToken=${encodeURIComponent(
-        token
-      )}`,
-      {
-      method: "DELETE",
-      }
-    );
-
-    if (!response.ok) {
-      setMessage("Could not delete listing.");
+    try {
+      await deleteListingSubmission({
+        id: listing.id,
+        whatsapp: listing.whatsapp,
+        verificationToken: token,
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not delete listing.");
       return;
     }
 
@@ -195,12 +184,10 @@ export default function MyListingsPage() {
     }
 
     const formData = new FormData(event.currentTarget);
-    const response = await fetch(`/api/listings/${editingListing.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    let result: { listing: ListingSubmission };
+
+    try {
+      result = await updateListingSubmission(editingListing.id, {
         ownerToken,
         verificationToken,
         kind: formData.get("kind"),
@@ -213,13 +200,9 @@ export default function MyListingsPage() {
         address: formData.get("address"),
         district: formData.get("district"),
         imageName: editingListing.imageName,
-      }),
-    });
-
-    const result = (await response.json()) as { listing?: ListingSubmission; error?: string };
-
-    if (!response.ok || !result.listing) {
-      setMessage(result.error ?? "Could not update listing. Verify WhatsApp OTP first.");
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not update listing. Verify WhatsApp OTP first.");
       return;
     }
 

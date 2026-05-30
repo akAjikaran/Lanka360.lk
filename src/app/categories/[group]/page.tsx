@@ -35,8 +35,8 @@ import { allSriLankaLocation, defaultLocation } from "@/lib/locationData";
 export const dynamic = "force-dynamic";
 
 const groupSlugs: Record<string, string> = {
-  "Local Stores": "stores",
-  "Local Services": "services",
+  "Sri Lankan Business": "stores",
+  "Sri Lankan Services": "services",
   "Sri Lankan Startups": "startups",
   "Tools and Product Hub": "products",
   "Local Events": "events",
@@ -51,12 +51,12 @@ const groupCopy: Record<
   }
 > = {
   stores: {
-    title: "Local Store Discovery",
+    title: "Sri Lankan Business",
     description: "Choose a store category, then browse the first available local listings below.",
     icon: Store,
   },
   services: {
-    title: "Local Service Providers",
+    title: "Sri Lankan Services",
     description: "Pick a service type and start with trusted providers from the first category.",
     icon: Wrench,
   },

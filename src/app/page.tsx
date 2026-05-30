@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { ExploreSidebar } from "@/components/ExploreSidebar";
+import { HeroRotatingHeadline } from "@/components/HeroRotatingHeadline";
 import { ListingModalButton } from "@/components/ListingModalButton";
+import { sriLankanDistricts } from "@/lib/locationData";
 import {
   ArrowRight,
   BadgeCheck,
@@ -12,7 +14,6 @@ import {
   Megaphone,
   MessageCircle,
   Rocket,
-  Search,
   ShieldCheck,
   Store,
   Tags,
@@ -21,51 +22,39 @@ import {
 
 const categoryTiles = [
   {
-    label: "Local Store Discovery",
-    href: "/categories/stores",
+    label: "Sri Lankan Business",
+    href: "/stores/cafe?explore=1",
     icon: Store,
   },
   {
-    label: "Local Service Providers",
-    href: "/categories/services",
+    label: "Sri Lankan Services",
+    href: "/services/home-repair?explore=1",
     icon: Wrench,
   },
   {
     label: "Sri Lankan Startups",
-    href: "/categories/startups",
+    href: "/growth/startups?explore=1",
     icon: Rocket,
   },
   {
     label: "Tools and Product Hub",
-    href: "/categories/products",
+    href: "/growth/products?explore=1",
     icon: Tags,
   },
   {
     label: "Local Events",
-    href: "/categories/events",
+    href: "/growth/events?explore=1",
     icon: CalendarDays,
   },
 ];
 
-const featuredListings = [
-  {
-    name: "Ceylon Craft Market",
-    meta: "Handmade gifts, Galle",
-    image: "https://images.unsplash.com/photo-1516211697506-8360dbcfe9a4?q=80&w=900&auto=format&fit=crop",
-    badge: "Open now",
-  },
-  {
-    name: "Kandy Tech Repairs",
-    meta: "Laptop and phone service",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=900&auto=format&fit=crop",
-    badge: "Verified",
-  },
-  {
-    name: "Nawala Food Street",
-    meta: "Restaurants and cafes",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=900&auto=format&fit=crop",
-    badge: "Popular",
-  },
+const districtImages = [
+  "https://images.unsplash.com/photo-1581351721010-8cf859cb14a4?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1588598198321-9735fd52455b?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1586612863268-136b8659794c?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=500&auto=format&fit=crop",
 ];
 
 export default function HomePage() {
@@ -75,26 +64,24 @@ export default function HomePage() {
         <ExploreSidebar />
 
         <div className="flex flex-col gap-4">
-          <section className="order-2 overflow-hidden rounded-2xl border border-stone-200 bg-white lg:order-1">
+          <section className="order-3 overflow-hidden rounded-2xl border border-stone-200 bg-white lg:order-1">
             <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.2fr_0.8fr] lg:p-9">
               <div className="flex flex-col justify-center">
                 <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-canvas-soft px-4 py-2 text-sm font-medium text-black">
                   <MapPin size={14} />
-                  Sri Lanka nearby search
+                  Sri Lanka creator and business network
                 </div>
-                <h1 className="max-w-2xl text-4xl font-bold leading-tight text-black sm:text-5xl lg:text-6xl">
-                  Find anything local in one trusted place.
-                </h1>
+                <HeroRotatingHeadline />
                 <p className="mt-4 max-w-2xl text-base font-normal leading-7 text-stone-600 sm:text-lg">
-                  Lanka360.lk connects people with Sri Lankan stores, services, businesses, jobs, products, news,
-                  events, and startups by location.
+                  Lanka360.lk connects passionate creators, business people, makers, builders, and innovators with
+                  local customers, partners, communities, products, services, startups, and events across Sri Lanka.
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <a
                     href="#categories"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-black transition hover:bg-brand-dark"
                   >
-                    Start Exploring
+                    Explore the Network
                     <ArrowRight size={18} />
                   </a>
                   <ListingModalButton
@@ -102,40 +89,21 @@ export default function HomePage() {
                     defaultType="Cafe"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-canvas-soft px-5 py-3 text-sm font-medium text-black transition hover:bg-stone-200"
                   >
-                    List for Free
+                    Join for Free
                     <Store size={18} />
                   </ListingModalButton>
                 </div>
               </div>
 
-              <div className="relative min-h-72 overflow-hidden rounded-2xl bg-black p-4 text-white">
-                <div className="relative grid h-full content-between gap-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    {featuredListings.slice(0, 2).map((listing) => (
-                      <div key={listing.name} className="overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15">
-                        <div className="relative h-24">
-                          <Image src={listing.image} alt="" fill sizes="180px" className="object-cover" />
-                        </div>
-                        <div className="p-3">
-                          <p className="text-xs font-black">{listing.name}</p>
-                          <p className="mt-1 text-[11px] text-white/70">{listing.meta}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="rounded-2xl bg-white p-4 text-black">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="text-sm font-black">Near Colombo</span>
-                      <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">
-                        1.2 km
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2 text-sm text-stone-500">
-                      <Search size={16} />
-                      plumber, cafe, job, startup...
-                    </div>
-                  </div>
-                </div>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-canvas-soft lg:aspect-[5/4]">
+                <Image
+                  src="/images/hero-image.png"
+                  alt="Sri Lankan creators, businesses, makers, builders, and innovators"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 520px, 100vw"
+                  className="object-cover"
+                />
               </div>
             </div>
           </section>
@@ -155,21 +123,48 @@ export default function HomePage() {
             ))}
           </section>
 
-          <section className="order-3 grid gap-4 lg:grid-cols-3">
+          <section className="order-2 rounded-lg border border-stone-200 bg-white p-4 shadow-sm lg:order-3 sm:p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <MapPin size={20} className="text-brand-dark" />
+              <h2 className="text-xl font-black text-stone-950">Sri Lankan Districts</h2>
+            </div>
+            <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-8">
+              {sriLankanDistricts.map((district, index) => (
+                <a
+                  key={district}
+                  href={`/stores/cafe?location=${encodeURIComponent(district)}&explore=1`}
+                  className="group text-center"
+                >
+                  <span className="relative mx-auto block size-18 overflow-hidden rounded-lg border-2 border-brand/20 bg-stone-100 shadow-sm transition group-hover:border-brand sm:size-24">
+                    <Image
+                      src={districtImages[index % districtImages.length]}
+                      alt={district}
+                      fill
+                      sizes="120px"
+                      className="object-cover"
+                    />
+                  </span>
+                  <span className="mt-2 block text-xs font-black leading-4 text-stone-800 sm:text-sm">{district}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+
+          <section className="order-4 grid gap-4 lg:grid-cols-3">
             {[
               {
                 title: "Find Near You",
-                copy: "Search by town, category, distance, open status, ratings, and verified details.",
+                copy: "Discover creators, stores, service teams, makers, startups, and local opportunities by district.",
                 icon: MapPin,
               },
               {
                 title: "Contact Directly",
-                copy: "Call, WhatsApp, visit, or apply without marketplace commissions or middlemen.",
+                copy: "Call, WhatsApp, visit, collaborate, or buy directly from the people building across Sri Lanka.",
                 icon: MessageCircle,
               },
               {
-                title: "Grow Locally",
-                copy: "Businesses, startups, and service providers can publish pages built for discovery.",
+                title: "Build Visibility",
+                copy: "Publish your work, business, service, product, event, or startup so the right people can find you.",
                 icon: Megaphone,
               },
             ].map((item) => (
@@ -183,27 +178,27 @@ export default function HomePage() {
             ))}
           </section>
 
-          <section id="list-business" className="order-4 rounded-lg border border-stone-200 bg-stone-950 p-5 text-white shadow-sm sm:p-7">
+          <section id="list-business" className="order-5 rounded-lg border border-stone-200 bg-stone-950 p-5 text-white shadow-sm sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-center">
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full bg-brand px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-stone-950">
                   <BadgeCheck size={14} />
-                  Free basic listing
+                  Free community profile
                 </p>
                 <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-                  Put your business on the Lanka360 map.
+                  Put your work on the Lanka360 map.
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-300 sm:text-base">
-                  Build a searchable profile for your store, service, product catalog, hiring needs, offers, and
-                  startup story. Customers reach you directly.
+                  Create a searchable profile for your business, craft, service, product, event, project, or startup.
+                  Customers, collaborators, and communities can reach you directly.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Verified profiles", icon: ShieldCheck },
-                  { label: "Google-ready pages", icon: Globe2 },
-                  { label: "Direct leads", icon: CircleDollarSign },
-                  { label: "Startup visibility", icon: Flame },
+                  { label: "Creator profiles", icon: ShieldCheck },
+                  { label: "Search-ready pages", icon: Globe2 },
+                  { label: "Direct connections", icon: CircleDollarSign },
+                  { label: "Innovation visibility", icon: Flame },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg bg-white/10 p-4 ring-1 ring-white/10">
                     <item.icon size={22} className="text-brand" />

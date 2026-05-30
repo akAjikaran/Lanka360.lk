@@ -33,8 +33,8 @@ import {
 import type { ComponentType, SVGProps } from "react";
 
 export const groupIcons: Record<string, LucideIcon> = {
-  "Local Stores": Store,
-  "Local Services": Wrench,
+  "Sri Lankan Business": Store,
+  "Sri Lankan Services": Wrench,
   "Sri Lankan Startups": Rocket,
   "Tools and Product Hub": Tags,
   "Local Events": CalendarDays,
@@ -77,8 +77,8 @@ export function ExploreSidebar({
   activeSlug?: string;
 }) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    "Local Stores": activeSection ? activeSection === "stores" : true,
-    "Local Services": activeSection === "services",
+    "Sri Lankan Business": activeSection ? activeSection === "stores" : true,
+    "Sri Lankan Services": activeSection === "services",
   });
   const [locationQuery, setLocationQuery] = useState("");
 

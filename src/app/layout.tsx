@@ -10,9 +10,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Lanka360.lk | Discover Local Sri Lanka",
+  title: "Lanka360.lk | Connect Sri Lanka's Creators and Builders",
   description:
-    "Find Sri Lankan local stores, services, businesses, jobs, products, news, startups, and events in one trusted place.",
+    "One platform connecting Sri Lanka's passionate creators, business people, makers, builders, innovators, local stores, services, startups, products, and events.",
 };
 
 export default function RootLayout({

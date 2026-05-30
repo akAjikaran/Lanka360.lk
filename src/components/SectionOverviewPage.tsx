@@ -19,14 +19,14 @@ const sectionMeta: Record<
   }
 > = {
   stores: {
-    label: "Local Store Discovery",
-    title: "Explore Local Store Discovery",
+    label: "Sri Lankan Business",
+    title: "Explore Sri Lankan Business",
     description: "Browse Sri Lankan shops, cafes, restaurants, groceries, medical stores, hardware, and more by area.",
     icon: Store,
   },
   services: {
-    label: "Local Service Providers",
-    title: "Explore Local Service Providers",
+    label: "Sri Lankan Services",
+    title: "Explore Sri Lankan Services",
     description: "Find trusted home repair, beauty, vehicle care, IT support, education, and healthcare services near you.",
     icon: Wrench,
   },

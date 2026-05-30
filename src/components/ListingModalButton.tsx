@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { sidebarGroups, type DirectorySection } from "@/lib/directoryData";
 import { sriLankanDistricts } from "@/lib/locationData";
+import { createListingSubmission } from "@/services/lanka360Api";
 
 type ListingKind = "store" | "service" | "growth" | "business";
 
@@ -84,31 +85,18 @@ export function ListingModalButton({
     const resolvedKind = kind === "business" ? getKindForType(selectedFormType) : kind;
 
     try {
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          kind: resolvedKind,
-          name: formData.get("name"),
-          type: selectedFormType,
-          whatsapp,
-          phone,
-          brandColor: formData.get("brandColor"),
-          description: formData.get("description"),
-          address: formData.get("address"),
-          district: formData.get("district"),
-          googleMapsUrl: formData.get("googleMapsUrl"),
-        }),
+      await createListingSubmission({
+        kind: resolvedKind,
+        name: formData.get("name"),
+        type: selectedFormType,
+        whatsapp,
+        phone,
+        brandColor: formData.get("brandColor"),
+        description: formData.get("description"),
+        address: formData.get("address"),
+        district: formData.get("district"),
+        googleMapsUrl: formData.get("googleMapsUrl"),
       });
-
-      const responseText = await response.text();
-      const result = responseText ? (JSON.parse(responseText) as { error?: string }) : {};
-
-      if (!response.ok) {
-        throw new Error(result.error ?? "Could not submit listing.");
-      }
 
       form.reset();
       setSameAsWhatsapp(false);

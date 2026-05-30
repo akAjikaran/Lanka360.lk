@@ -61,3 +61,15 @@ select {
   border-color: #1dcb79;
   box-shadow: 0 0 0 4px rgba(29, 203, 121, 0.18);
 }
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

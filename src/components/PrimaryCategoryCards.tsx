@@ -4,13 +4,13 @@ import type { DirectorySection } from "@/lib/directoryData";
 
 const primaryCategoryCards = [
   {
-    label: "Local Store Discovery",
+    label: "Sri Lankan Business",
     href: "/stores/cafe",
     section: "stores",
     icon: Store,
   },
   {
-    label: "Local Service Providers",
+    label: "Sri Lankan Services",
     href: "/services/home-repair",
     section: "services",
     icon: Wrench,
@@ -44,6 +44,10 @@ const primaryCategoryCards = [
   icon: typeof Store;
 }[];
 
+function withExploreDrawer(href: string) {
+  return `${href}${href.includes("?") ? "&" : "?"}explore=1`;
+}
+
 export function PrimaryCategoryCards({
   activeSection,
   activeSlug,
@@ -54,7 +58,7 @@ export function PrimaryCategoryCards({
   withLocation?: (href: string) => string;
 }) {
   return (
-    <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <section className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {primaryCategoryCards.map((card) => {
         const CardIcon = card.icon;
         const active =
@@ -63,8 +67,8 @@ export function PrimaryCategoryCards({
         return (
           <Link
             key={card.href}
-            href={withLocation(card.href)}
-            className={`rounded-2xl border p-4 text-center transition hover:border-brand ${
+            href={withExploreDrawer(withLocation(card.href))}
+            className={`rounded-xl border p-3 text-center transition hover:border-brand sm:rounded-2xl sm:p-4 ${
               active ? "border-brand bg-brand/10" : "border-stone-200 bg-white"
             }`}
             aria-current={active ? "page" : undefined}
@@ -72,7 +76,7 @@ export function PrimaryCategoryCards({
             <span className="mx-auto grid size-11 place-items-center rounded-full bg-canvas-soft text-black">
               <CardIcon size={22} />
             </span>
-            <span className="mt-3 block text-sm font-medium text-black">{card.label}</span>
+            <span className="mt-3 block text-xs font-medium leading-4 text-black sm:text-sm">{card.label}</span>
           </Link>
         );
       })}
